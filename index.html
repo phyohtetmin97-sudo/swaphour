@@ -1,0 +1,2845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwapHour | Peer-to-Peer Campus Tutoring & Open Study Hub</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons via CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        .view-section {
+            animation: fadeSlide 0.25s ease-out forwards;
+        }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .blueprint-grid {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+        /* Custom subtle scrollbar */
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased">
+
+    <!-- ==================== STICKY TOP NAVIGATION BAR ==================== -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchView('home')">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-900 flex items-center justify-center text-white shadow-sm">
+                        <i data-lucide="graduation-cap" class="w-5 h-5 text-emerald-400"></i>
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-xl tracking-tight text-indigo-950">SwapHour</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                <nav id="desktop-main-nav" class="hidden xl:flex items-center space-x-1">
+                    <button onclick="switchView('home')" id="nav-home" class="nav-btn px-3 py-2 rounded-xl text-xs font-bold text-indigo-900 bg-indigo-50 transition flex items-center gap-1.5">
+                        <i data-lucide="home" class="w-3.5 h-3.5"></i> Home
+                    </button>
+                    <button onclick="switchView('tutors')" id="nav-tutors" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-indigo-900 hover:bg-slate-100 transition flex items-center gap-1.5">
+                        <i data-lucide="users" class="w-3.5 h-3.5"></i> Find Tutors
+                    </button>
+                    <button onclick="switchView('offer')" id="nav-offer" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-indigo-900 hover:bg-slate-100 transition flex items-center gap-1.5">
+                        <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Offer Tutoring
+                    </button>
+                    <button onclick="switchView('notes')" id="nav-notes" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-indigo-900 hover:bg-slate-100 transition flex items-center gap-1.5">
+                        <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Open Notes
+                    </button>
+                    <button onclick="switchView('forum')" id="nav-forum" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-indigo-900 hover:bg-slate-100 transition flex items-center gap-1.5">
+                        <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Q&amp;A Forum
+                    </button>
+                    <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-indigo-900 hover:bg-slate-100 transition flex items-center gap-1.5">
+                        <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> My Dashboard
+                    </button>
+                    <button onclick="switchView('about')" id="nav-about" class="nav-btn px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-indigo-900 hover:bg-slate-100 transition flex items-center gap-1.5">
+                        <i data-lucide="info" class="w-3.5 h-3.5"></i> About Us
+                    </button>
+                </nav>
+
+                <!-- Right Controls: Skill Credits Wallet + User Account -->
+                <div class="flex items-center gap-2 sm:gap-2.5">
+                    <!-- Logged In State -->
+                    <div id="nav-loggedin-group" class="flex items-center gap-2 sm:gap-2.5">
+                        <!-- Credit Wallet Pill -->
+                        <button onclick="switchView('dashboard'); switchDashboardTab('ledger')" title="Open Skill Credit Ledger" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 hover:bg-amber-100 transition shadow-2xs">
+                            <i data-lucide="coins" class="w-4 h-4 text-amber-500"></i>
+                            <span id="nav-credits" class="font-mono font-extrabold text-sm">3</span>
+                            <span class="hidden sm:inline text-xs font-bold">Credits</span>
+                        </button>
+
+                        <!-- Profile Pill -->
+                        <button onclick="switchView('profile')" title="View & Edit Profile" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 transition text-left">
+                            <div id="nav-avatar" class="w-7 h-7 rounded-full bg-indigo-900 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                                AL
+                            </div>
+                            <div class="hidden md:block">
+                                <p id="nav-username" class="text-xs font-bold text-slate-800 leading-tight">Alex Lin</p>
+                                <p id="nav-userrole" class="text-[10px] font-semibold text-emerald-700 leading-tight">Student</p>
+                            </div>
+                        </button>
+
+                        <!-- Log Out Button -->
+                        <button onclick="handleLogout()" title="Log Out" class="p-2 sm:px-2.5 sm:py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-xs font-bold transition flex items-center gap-1">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                            <span class="hidden lg:inline">Logout</span>
+                        </button>
+                    </div>
+
+                    <!-- Logged Out State -->
+                    <div id="nav-loggedout-group" class="hidden items-center gap-2">
+                        <button onclick="switchView('login')" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition">
+                            Log In
+                        </button>
+                        <button onclick="switchView('signup')" class="px-3.5 py-2 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold shadow-2xs transition">
+                            Sign Up
+                        </button>
+                    </div>
+
+                    <!-- Mobile/Tablet Drawer Toggle -->
+                    <button id="mobile-menu-toggle" onclick="toggleMobileMenu()" class="xl:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile/Tablet Navigation Drawer -->
+        <div id="mobile-menu" class="hidden xl:hidden bg-white border-t border-slate-100 px-4 pt-2 pb-4 space-y-1 shadow-lg">
+            <button onclick="switchView('home'); toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-indigo-50 flex items-center gap-2.5">
+                <i data-lucide="home" class="w-4 h-4 text-indigo-700"></i> Home
+            </button>
+            <button onclick="switchView('tutors'); toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-indigo-50 flex items-center gap-2.5">
+                <i data-lucide="users" class="w-4 h-4 text-indigo-700"></i> Find Tutors
+            </button>
+            <button onclick="switchView('offer'); toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-indigo-50 flex items-center gap-2.5">
+                <i data-lucide="plus-circle" class="w-4 h-4 text-indigo-700"></i> Offer Tutoring
+            </button>
+            <button onclick="switchView('notes'); toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-indigo-50 flex items-center gap-2.5">
+                <i data-lucide="book-open" class="w-4 h-4 text-indigo-700"></i> Open Notes Library
+            </button>
+            <button onclick="switchView('forum'); toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-indigo-50 flex items-center gap-2.5">
+                <i data-lucide="message-square" class="w-4 h-4 text-indigo-700"></i> Community Q&amp;A Forum
+            </button>
+            <button onclick="switchView('dashboard'); toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-indigo-50 flex items-center gap-2.5">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 text-indigo-700"></i> My Dashboard
+            </button>
+            <button onclick="switchView('about'); toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-indigo-50 flex items-center gap-2.5">
+                <i data-lucide="info" class="w-4 h-4 text-indigo-700"></i> About Us
+            </button>
+            <button onclick="switchView('profile'); toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-indigo-50 flex items-center gap-2.5">
+                <i data-lucide="user-cog" class="w-4 h-4 text-indigo-700"></i> Profile &amp; Settings
+            </button>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN VIEWPORT ==================== -->
+    <main class="flex-grow">
+
+        <!-- =====================================================================
+             VIEW 1: HOME LANDING PAGE
+        ===================================================================== -->
+        <section id="view-home" class="view-section">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 text-white py-14 sm:py-20 px-4">
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                    <div class="lg:col-span-7 space-y-6">
+                        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                            Learn Any Course From Peers Who <span class="text-emerald-400">Just Aced It.</span>
+                        </h1>
+                        <p class="text-indigo-100 text-base sm:text-lg max-w-2xl leading-relaxed">
+                            Trade tutoring hours using zero-cost Skill Credits, download peer-verified study guides, and get fast homework answers from fellow students on campus.
+                        </p>
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <button onclick="switchView('tutors')" class="px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm sm:text-base shadow-lg transition flex items-center gap-2">
+                                <i data-lucide="search" class="w-4 h-4"></i> Find a Peer Tutor
+                            </button>
+                            <button onclick="switchView('offer')" class="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/25 text-white font-bold text-sm sm:text-base transition flex items-center gap-2">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i> Offer Tutoring (+1 Credit)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2x2 Live Campus Impact Card -->
+                    <div class="lg:col-span-5">
+                        <div class="bg-white text-slate-900 rounded-2xl p-6 sm:p-8 shadow-2xl border border-slate-200">
+                            <div class="flex items-center justify-between mb-5">
+                                <div>
+                                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600">Live Campus Activity</span>
+                                    <h2 class="text-lg font-extrabold text-indigo-950">Community Pulse</h2>
+                                </div>
+                                <span class="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Active
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3.5">
+                                <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-800 flex items-center justify-center mb-2.5">
+                                        <i data-lucide="users" class="w-4 h-4"></i>
+                                    </div>
+                                    <p id="stat-tutors" class="text-2xl font-extrabold text-slate-900">198</p>
+                                    <p class="text-xs font-semibold text-slate-500 mt-0.5">Peer Mentors</p>
+                                </div>
+
+                                <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2.5">
+                                        <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                                    </div>
+                                    <p id="stat-sessions" class="text-2xl font-extrabold text-slate-900">684</p>
+                                    <p class="text-xs font-semibold text-slate-500 mt-0.5">Sessions Completed</p>
+                                </div>
+
+                                <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div class="w-9 h-9 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center mb-2.5">
+                                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                                    </div>
+                                    <p id="stat-notes" class="text-2xl font-extrabold text-slate-900">342</p>
+                                    <p class="text-xs font-semibold text-slate-500 mt-0.5">Open Study Guides</p>
+                                </div>
+
+                                <div class="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80">
+                                    <div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center mb-2.5">
+                                        <i data-lucide="coins" class="w-4 h-4"></i>
+                                    </div>
+                                    <p id="stat-credits" class="text-2xl font-extrabold text-amber-950">1,420</p>
+                                    <p class="text-xs font-semibold text-amber-800 mt-0.5">Credits Exchanged</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3-Step Time-Bank Explainer -->
+            <div class="bg-white border-b border-slate-200 py-12 px-4">
+                <div class="max-w-7xl mx-auto">
+                    <div class="text-center max-w-2xl mx-auto mb-10">
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">Zero-Cost Academic Economy</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">How the Time-Bank Credit System Works</h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <div class="w-11 h-11 rounded-xl bg-indigo-900 text-white font-extrabold text-base flex items-center justify-center mb-4">1</div>
+                            <h3 class="text-lg font-extrabold text-slate-900 mb-2">Start with 3 Free Credits</h3>
+                            <p class="text-sm text-slate-600 leading-relaxed">Every verified student receives 3 Skill Credits on sign-up so you can immediately book 1-on-1 help for upcoming exams or coding labs.</p>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <div class="w-11 h-11 rounded-xl bg-emerald-600 text-white font-extrabold text-base flex items-center justify-center mb-4">2</div>
+                            <h3 class="text-lg font-extrabold text-slate-900 mb-2">Teach or Share Notes (+1 Cr)</h3>
+                            <p class="text-sm text-slate-600 leading-relaxed">Host a 1-hour peer tutoring session in a course you aced—or upload structured study guides to Open Notes—to earn +1 Credit.</p>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <div class="w-11 h-11 rounded-xl bg-amber-500 text-white font-extrabold text-base flex items-center justify-center mb-4">3</div>
+                            <h3 class="text-lg font-extrabold text-slate-900 mb-2">Build Verified Mentor Reputation</h3>
+                            <p class="text-sm text-slate-600 leading-relaxed">Collect 5-star peer reviews, earn achievement badges, and climb the Campus Mentor leaderboard.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Tutoring Sessions & Top Mentors Split -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+                <!-- Featured Sessions -->
+                <div>
+                    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-2">
+                        <div>
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-600">Open Slots Available Now</span>
+                            <h2 class="text-2xl font-extrabold text-slate-900">Featured Tutoring Sessions</h2>
+                        </div>
+                        <button onclick="switchView('tutors')" class="text-sm font-bold text-indigo-800 hover:text-emerald-600 flex items-center gap-1">
+                            View Full Directory <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <div id="home-featured-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Top-Rated Student Mentors Leaderboard -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                        <div>
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-amber-600">Campus Recognition</span>
+                            <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Top-Rated Student Mentors</h2>
+                        </div>
+                        <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl">Ranked by Completed Sessions &amp; Peer Rating</span>
+                    </div>
+                    <div id="home-mentors-leaderboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VIEW 2: FIND TUTORS DIRECTORY
+        ===================================================================== -->
+        <section id="view-tutors" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Find Peer Tutors</h1>
+                    <p class="text-sm text-slate-600 mt-1">Browse student-led 1-on-1 sessions across campus. Every session costs <strong>1 Skill Credit</strong>.</p>
+                </div>
+                <button onclick="switchView('offer')" class="px-4 py-2.5 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-sm shadow-xs transition self-start md:self-auto flex items-center gap-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Offer Tutoring Slot
+                </button>
+            </div>
+
+            <!-- Search, Sort & Category Pills -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs mb-6 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                    <div class="md:col-span-8 relative">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+                        <input type="text" id="tutor-search-input" oninput="renderTutorsDirectory()" placeholder="Search course code, topic (e.g., Data Structures, Calculus, IELTS), or mentor name..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                    </div>
+                    <div class="md:col-span-4">
+                        <select id="tutor-sort-select" onchange="renderTutorsDirectory()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                            <option value="rating">Sort: Highest Rated</option>
+                            <option value="recent">Sort: Most Recent</option>
+                            <option value="subject">Sort: Subject A–Z</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Category Pills -->
+                <div class="flex flex-wrap items-center gap-2 pt-1" id="tutor-category-pills">
+                    <button onclick="setTutorCategory('All')" data-cat="All" class="tcat-pill px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-900 text-white transition">All</button>
+                    <button onclick="setTutorCategory('Programming & CS')" data-cat="Programming & CS" class="tcat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Programming &amp; CS</button>
+                    <button onclick="setTutorCategory('Mathematics')" data-cat="Mathematics" class="tcat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Mathematics</button>
+                    <button onclick="setTutorCategory('Languages')" data-cat="Languages" class="tcat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Languages</button>
+                    <button onclick="setTutorCategory('Engineering')" data-cat="Engineering" class="tcat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Engineering</button>
+                    <button onclick="setTutorCategory('Science')" data-cat="Science" class="tcat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Science</button>
+                    <button onclick="setTutorCategory('Design & Arts')" data-cat="Design & Arts" class="tcat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Design &amp; Arts</button>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between mb-4">
+                <p id="tutor-directory-count" class="text-xs font-bold text-slate-500">Showing 6 sessions</p>
+            </div>
+
+            <!-- Directory Grid -->
+            <div id="tutors-directory-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Rendered via JS -->
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VIEW 3: OFFER TUTORING PAGE (WITH LIVE PREVIEW CARD)
+        ===================================================================== -->
+        <section id="view-offer" class="view-section hidden max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-6">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Offer a Peer Tutoring Session</h1>
+                <p class="text-sm text-slate-600 mt-1">Share your academic strengths with classmates and earn <strong>+1 Skill Credit</strong> upon completion.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <!-- Creation Form -->
+                <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                    <div class="bg-indigo-900 px-6 py-4 text-white">
+                        <h2 class="text-base font-extrabold">Session Details</h2>
+                        <p class="text-xs text-indigo-200">Posting as <strong id="offer-mentor-display">Alex Lin</strong></p>
+                    </div>
+
+                    <form id="offer-tutoring-form" onsubmit="handleOfferSubmit(event)" class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wide text-slate-700 mb-1.5">Session Title / Course Code *</label>
+                            <input type="text" id="offer-title" required oninput="updateOfferPreview()" placeholder="e.g., CS204 Data Structures & Recursion Lab Prep" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wide text-slate-700 mb-1.5">Subject Category *</label>
+                                <select id="offer-category" onchange="updateOfferPreview()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="Programming & CS">Programming &amp; CS</option>
+                                    <option value="Mathematics">Mathematics</option>
+                                    <option value="Languages">Languages</option>
+                                    <option value="Engineering">Engineering</option>
+                                    <option value="Science">Science</option>
+                                    <option value="Design & Arts">Design &amp; Arts</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wide text-slate-700 mb-1.5">Skill Level *</label>
+                                <select id="offer-level" onchange="updateOfferPreview()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="Beginner / Intro">Beginner / Intro</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Exam Prep / Advanced">Exam Prep / Advanced</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wide text-slate-700 mb-1.5">Session Format *</label>
+                                <select id="offer-format" onchange="updateOfferPreview()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="Campus Library">Campus Library (In-Person)</option>
+                                    <option value="Online (Google Meet)">Online (Google Meet)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wide text-slate-700 mb-1.5">Date &amp; Time Slot *</label>
+                                <input type="text" id="offer-datetime" required oninput="updateOfferPreview()" value="Tomorrow, 3:00 PM – 4:00 PM" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wide text-slate-700 mb-1.5">Syllabus &amp; Topics Covered *</label>
+                            <textarea id="offer-desc" rows="3" required oninput="updateOfferPreview()" placeholder="Describe what concepts, homework problems, or exam topics you can help with..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-3 pt-2">
+                            <button type="button" onclick="switchView('tutors')" class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50">Cancel</button>
+                            <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm shadow-sm transition flex items-center gap-2">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i> Publish Tutoring Session
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Live Card Preview -->
+                <div class="lg:col-span-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Live Directory Card Preview</span>
+                        <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">Real-Time</span>
+                    </div>
+                    <div id="offer-live-preview" class="bg-white rounded-2xl border-2 border-dashed border-indigo-200 p-5 shadow-xs space-y-3">
+                        <!-- Updated dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VIEW 4: OPEN NOTES LIBRARY
+        ===================================================================== -->
+        <section id="view-notes" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Open Notes Library</h1>
+                    <p class="text-sm text-slate-600 mt-1">Free peer-verified study guides, cheat sheets, and exam summaries. Upload your notes to earn <strong>+1 Skill Credit</strong>.</p>
+                </div>
+                <button onclick="openUploadNoteModal()" class="px-4 py-2.5 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-sm shadow-xs transition self-start md:self-auto flex items-center gap-2">
+                    <i data-lucide="upload-cloud" class="w-4 h-4"></i> Upload Study Note (+1 Credit)
+                </button>
+            </div>
+
+            <!-- Search & Subject Filter -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs mb-6 flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-grow">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+                    <input type="text" id="notes-search-input" oninput="renderNotesLibrary()" placeholder="Search course codes, cheat sheets, Algorithms, Calculus, Physics..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <select id="notes-subject-filter" onchange="renderNotesLibrary()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="All">All Subjects</option>
+                    <option value="Programming & CS">Programming &amp; CS</option>
+                    <option value="Mathematics">Mathematics</option>
+                    <option value="Languages">Languages</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Science">Science</option>
+                    <option value="Design & Arts">Design &amp; Arts</option>
+                </select>
+            </div>
+
+            <!-- Notes Grid -->
+            <div id="notes-library-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Rendered via JS -->
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VIEW 5: COMMUNITY Q&A FORUM
+        ===================================================================== -->
+        <section id="view-forum" class="view-section hidden max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Community Q&amp;A Forum</h1>
+                    <p class="text-sm text-slate-600 mt-1">Ask coursework questions, debug tricky concepts, and help classmates with quick explanations.</p>
+                </div>
+                <button onclick="openAskQuestionModal()" class="px-4 py-2.5 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-sm shadow-xs transition self-start sm:self-auto flex items-center gap-2">
+                    <i data-lucide="message-square-plus" class="w-4 h-4"></i> Ask a Question
+                </button>
+            </div>
+
+            <!-- Subject Filter Pills -->
+            <div class="flex flex-wrap items-center gap-2 mb-6" id="forum-filter-pills">
+                <button onclick="setForumCategory('All')" data-fcat="All" class="fcat-pill px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-900 text-white transition">All Discussions</button>
+                <button onclick="setForumCategory('Programming & CS')" data-fcat="Programming & CS" class="fcat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">Programming &amp; CS</button>
+                <button onclick="setForumCategory('Mathematics')" data-fcat="Mathematics" class="fcat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">Mathematics</button>
+                <button onclick="setForumCategory('Engineering')" data-fcat="Engineering" class="fcat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">Engineering</button>
+                <button onclick="setForumCategory('Languages')" data-fcat="Languages" class="fcat-pill px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition">Languages</button>
+            </div>
+
+            <!-- Forum Threads List -->
+            <div id="forum-threads-list" class="space-y-4">
+                <!-- Rendered via JS -->
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VIEW 6: MY DASHBOARD (MULTI-TAB WORKSPACE)
+        ===================================================================== -->
+        <section id="view-dashboard" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+            <!-- Top Summary Header -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div id="dash-avatar" class="w-14 h-14 rounded-2xl bg-indigo-900 text-emerald-400 font-extrabold text-xl flex items-center justify-center shadow-xs">
+                        AL
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 id="dash-username" class="text-xl sm:text-2xl font-extrabold text-slate-900">Alex Lin</h1>
+                            <span id="dash-role-pill" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-900">Student</span>
+                        </div>
+                        <p id="dash-dept" class="text-xs sm:text-sm text-slate-500 mt-0.5">Informatics &amp; Computer Science</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <div class="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-center">
+                        <p class="text-[10px] font-extrabold uppercase text-amber-800">Wallet Balance</p>
+                        <p class="text-lg font-mono font-extrabold text-amber-950"><span id="dash-wallet-balance">3</span> Credits</p>
+                    </div>
+                    <button onclick="switchView('profile')" class="px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                        <i data-lucide="settings" class="w-4 h-4"></i> Edit Profile
+                    </button>
+                </div>
+            </div>
+
+            <!-- Multi-Tab Navigation Bar -->
+            <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-3" id="dashboard-tabs">
+                <button onclick="switchDashboardTab('booked')" id="dtab-booked" class="dtab-btn px-4 py-2 rounded-xl text-xs font-bold bg-indigo-900 text-white transition flex items-center gap-1.5">
+                    <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i> My Booked Sessions
+                </button>
+                <button onclick="switchDashboardTab('teaching')" id="dtab-teaching" class="dtab-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5">
+                    <i data-lucide="presentation" class="w-3.5 h-3.5"></i> Sessions I'm Teaching
+                </button>
+                <button onclick="switchDashboardTab('ledger')" id="dtab-ledger" class="dtab-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition flex items-center gap-1.5">
+                    <i data-lucide="receipt" class="w-3.5 h-3.5"></i> Skill Credit Ledger
+                </button>
+                <button onclick="switchDashboardTab('faculty')" id="dtab-faculty" class="dtab-btn hidden px-4 py-2 rounded-xl text-xs font-bold bg-emerald-50 border border-emerald-300 text-emerald-900 hover:bg-emerald-100 transition items-center gap-1.5">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Faculty Moderation Panel
+                </button>
+            </div>
+
+            <!-- TAB 1: MY BOOKED SESSIONS -->
+            <div id="dpanel-booked" class="dpanel space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-extrabold text-slate-900">Sessions You Booked</h2>
+                    <button onclick="switchView('tutors')" class="text-xs font-bold text-indigo-700 hover:underline">+ Browse More Tutors</button>
+                </div>
+                <div id="dash-booked-container" class="space-y-3">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+
+            <!-- TAB 2: SESSIONS I'M TEACHING -->
+            <div id="dpanel-teaching" class="dpanel hidden space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-extrabold text-slate-900">Tutoring Offers You Created</h2>
+                    <button onclick="switchView('offer')" class="text-xs font-bold text-emerald-700 hover:underline">+ Offer New Session</button>
+                </div>
+                <div id="dash-teaching-container" class="space-y-3">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+
+            <!-- TAB 3: SKILL CREDIT LEDGER -->
+            <div id="dpanel-ledger" class="dpanel hidden bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs">
+                <div class="p-5 border-b border-slate-100">
+                    <h2 class="text-lg font-extrabold text-slate-900">Skill Credit Transaction History</h2>
+                    <p class="text-xs text-slate-500">Complete audit log of credits earned and spent across your account.</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-500">
+                                <th class="py-3 px-5">Activity / Reason</th>
+                                <th class="py-3 px-5">Timestamp</th>
+                                <th class="py-3 px-5 text-right">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dash-ledger-tbody" class="divide-y divide-slate-100 text-xs sm:text-sm">
+                            <!-- Rendered via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 4: FACULTY MODERATION PANEL -->
+            <div id="dpanel-faculty" class="dpanel hidden space-y-6">
+                <!-- Engagement Summary -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Verified Study Guides</p>
+                        <p id="fac-verified-count" class="text-2xl font-extrabold text-emerald-700 mt-1">3</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Active Campus Listings</p>
+                        <p id="fac-listings-count" class="text-2xl font-extrabold text-indigo-900 mt-1">6</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200">
+                        <p class="text-xs font-bold text-slate-500 uppercase">Forum Threads Monitored</p>
+                        <p id="fac-threads-count" class="text-2xl font-extrabold text-slate-800 mt-1">3</p>
+                    </div>
+                </div>
+
+                <!-- Study Notes Verification Queue -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+                    <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                        <i data-lucide="badge-check" class="w-5 h-5 text-emerald-600"></i> Study Notes Verification &amp; Moderation
+                    </h3>
+                    <div id="fac-notes-list" class="space-y-2.5">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Forum Moderation Queue -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+                    <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                        <i data-lucide="flag" class="w-5 h-5 text-rose-600"></i> Community Forum Post Moderation
+                    </h3>
+                    <div id="fac-forum-list" class="space-y-2.5">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VIEW 7: USER PROFILE & SETTINGS PAGE
+        ===================================================================== -->
+        <section id="view-profile" class="view-section hidden max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-950 to-indigo-800 px-6 py-8 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div id="prof-avatar" class="w-16 h-16 rounded-2xl bg-emerald-500 text-slate-950 font-extrabold text-2xl flex items-center justify-center shadow">
+                            AL
+                        </div>
+                        <div>
+                            <h1 id="prof-display-name" class="text-2xl font-extrabold">Alex Lin</h1>
+                            <p id="prof-email-display" class="text-xs text-indigo-200">alex.lin@university.edu • Student</p>
+                        </div>
+                    </div>
+                    <button onclick="resetDemoData()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-rose-600 border border-white/20 text-white text-xs font-bold transition self-start sm:self-auto flex items-center gap-1.5">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset Demo Data
+                    </button>
+                </div>
+
+                <form onsubmit="handleProfileSave(event)" class="p-6 sm:p-8 space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Display Name *</label>
+                            <input type="text" id="prof-input-name" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Department / Major *</label>
+                            <input type="text" id="prof-input-dept" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Academic Bio</label>
+                        <textarea id="prof-input-bio" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Taught Skills &amp; Subjects (Comma-separated)</label>
+                        <input type="text" id="prof-input-skills" placeholder="e.g., Python, Data Structures, SQL, Web Development" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                        <div id="prof-skills-tags" class="flex flex-wrap gap-2 mt-2.5"></div>
+                    </div>
+
+                    <!-- Earned Achievement Badges -->
+                    <div class="pt-2">
+                        <label class="block text-xs font-bold uppercase text-slate-700 mb-2">Earned Achievement Badges</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-2.5">
+                                <i data-lucide="award" class="w-5 h-5 text-amber-600 shrink-0"></i>
+                                <div>
+                                    <p class="text-xs font-extrabold text-amber-950">Early Adopter</p>
+                                    <p class="text-[10px] text-amber-800">Joined Campus Exchange</p>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center gap-2.5">
+                                <i data-lucide="book-check" class="w-5 h-5 text-emerald-600 shrink-0"></i>
+                                <div>
+                                    <p class="text-xs font-extrabold text-emerald-950">Note Contributor</p>
+                                    <p class="text-[10px] text-emerald-800">Shared Open Study Guides</p>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center gap-2.5">
+                                <i data-lucide="sparkles" class="w-5 h-5 text-indigo-600 shrink-0"></i>
+                                <div>
+                                    <p class="text-xs font-extrabold text-indigo-950">Peer Helper</p>
+                                    <p class="text-[10px] text-indigo-800">Active Campus Mentor</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-sm shadow-xs transition">
+                            Save Profile Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VIEW 8: LOGIN PAGE
+        ===================================================================== -->
+        <section id="view-login" class="view-section hidden">
+            <div class="bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 min-h-[calc(100vh-4rem)] py-12 sm:py-16 px-4 flex items-center">
+                <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+                    <!-- Left Column: Full-Bleed Brand & Campus Info (Matches Homepage) -->
+                    <div class="lg:col-span-6 text-white space-y-6">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-extrabold uppercase tracking-wider text-emerald-300">
+                            <i data-lucide="graduation-cap" class="w-4 h-4"></i> Welcome Back to SwapHour
+                        </div>
+                        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                            Pick Up Right Where Your <span class="text-emerald-400">Study Loop</span> Left Off.
+                        </h1>
+                        <p class="text-indigo-100 text-base sm:text-lg max-w-xl leading-relaxed">
+                            Access your Skill Credit wallet, join upcoming 1-on-1 tutoring sessions, download peer-verified notes, and collaborate with classmates across campus.
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 max-w-xl">
+                            <div class="p-4 rounded-2xl bg-white/10 border border-white/15">
+                                <p class="text-sm font-extrabold text-white flex items-center gap-2">
+                                    <i data-lucide="coins" class="w-4 h-4 text-amber-400"></i> Zero-Cost Credits
+                                </p>
+                                <p class="text-xs text-indigo-200 mt-1">Earn 1 credit per hour taught and spend it on any subject.</p>
+                            </div>
+                            <div class="p-4 rounded-2xl bg-white/10 border border-white/15">
+                                <p class="text-sm font-extrabold text-white flex items-center gap-2">
+                                    <i data-lucide="book-open-check" class="w-4 h-4 text-emerald-400"></i> Verified Study Notes
+                                </p>
+                                <p class="text-xs text-indigo-200 mt-1">Instant access to peer-reviewed exam guides and summaries.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Login Card -->
+                    <div class="lg:col-span-6 w-full max-w-lg mx-auto lg:ml-auto lg:mr-0">
+                        <div id="login-auth-notice" class="hidden mb-4 p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 text-xs font-semibold flex items-center gap-2 shadow-md">
+                            <i data-lucide="lock" class="w-4 h-4 text-amber-600 shrink-0"></i>
+                            <span id="login-auth-notice-text">Please sign in or create an account to continue.</span>
+                        </div>
+
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden">
+                            <div class="px-6 pt-6 pb-4 border-b border-slate-100">
+                                <h2 class="text-2xl font-extrabold text-slate-900">Sign In to SwapHour</h2>
+                                <p class="text-xs text-slate-500 mt-1">Use a 1-click demo profile or your university email</p>
+                            </div>
+
+                            <div class="p-6 sm:p-8 space-y-5">
+                                <!-- 1-Click Demo Login Box -->
+                                <div class="p-4 rounded-xl bg-emerald-50/80 border border-emerald-200 space-y-2.5">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800">1-Click Demo Login</span>
+                                        <span class="text-[10px] font-bold bg-white text-emerald-700 px-2 py-0.5 rounded border border-emerald-200">Instant Access</span>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <button type="button" onclick="quickDemoLogin('alex.lin@university.edu')" class="px-3 py-2.5 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                            <i data-lucide="user" class="w-3.5 h-3.5 text-emerald-400"></i> Student (Alex Lin)
+                                        </button>
+                                        <button type="button" onclick="quickDemoLogin('sarah.chen@university.edu')" class="px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Faculty (Dr. Chen)
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="relative flex items-center justify-center">
+                                    <div class="border-t border-slate-200 w-full"></div>
+                                    <span class="bg-white px-3 text-[11px] font-bold uppercase text-slate-400">or with university email</span>
+                                    <div class="border-t border-slate-200 w-full"></div>
+                                </div>
+
+                                <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                                    <div id="login-error" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold"></div>
+
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">University Email *</label>
+                                        <input type="email" id="login-email" required placeholder="alex.lin@university.edu" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Password *</label>
+                                        <div class="relative">
+                                            <input type="password" id="login-password" required placeholder="Enter password (demo123)" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                                            <button type="button" onclick="togglePasswordField('login-password')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="w-full py-3 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white font-extrabold text-sm shadow-sm transition">
+                                        Log In
+                                    </button>
+                                </form>
+
+                                <p class="text-center text-xs text-slate-600">
+                                    Don't have an account?
+                                    <button type="button" onclick="switchView('signup')" class="font-extrabold text-emerald-700 hover:underline ml-1">
+                                        Sign Up (+3 Free Credits)
+                                    </button>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VIEW 9: SIGN UP PAGE
+        ===================================================================== -->
+        <section id="view-signup" class="view-section hidden">
+            <div class="bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 min-h-[calc(100vh-4rem)] py-12 sm:py-16 px-4 flex items-center">
+                <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+                    <!-- Left Column: Full-Bleed Onboarding Value Props -->
+                    <div class="lg:col-span-6 text-white space-y-6">
+                        <span class="inline-flex items-center gap-2 text-xs font-extrabold uppercase bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-full">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> +3 Free Welcome Skill Credits
+                        </span>
+                        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                            Join the Campus <span class="text-emerald-400">Peer Learning</span> Network.
+                        </h1>
+                        <p class="text-indigo-100 text-base sm:text-lg max-w-xl leading-relaxed">
+                            Create your free student or faculty account in seconds. Start booking 1-on-1 help immediately or share your course expertise to build your mentor reputation.
+                        </p>
+                        <ul class="space-y-3 text-sm text-indigo-100 pt-1">
+                            <li class="flex items-center gap-3">
+                                <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0"><i data-lucide="check" class="w-3.5 h-3.5"></i></span>
+                                <span>3 starter Skill Credits credited to your wallet right away</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0"><i data-lucide="check" class="w-3.5 h-3.5"></i></span>
+                                <span>Unlimited downloads from the Open Notes Library</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0"><i data-lucide="check" class="w-3.5 h-3.5"></i></span>
+                                <span>Earn +1 Credit every time you tutor or upload study guides</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Right Column: Sign Up Form Card -->
+                    <div class="lg:col-span-6 w-full max-w-lg mx-auto lg:ml-auto lg:mr-0">
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden">
+                            <div class="px-6 pt-6 pb-4 border-b border-slate-100">
+                                <h2 class="text-2xl font-extrabold text-slate-900">Create Your Campus Account</h2>
+                                <p class="text-xs text-slate-500 mt-1">Join peers trading tutoring hours and open study guides.</p>
+                            </div>
+
+                            <form id="signup-form" onsubmit="handleSignup(event)" class="p-6 sm:p-8 space-y-4">
+                                <div id="signup-error" class="hidden p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold"></div>
+
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Full Name *</label>
+                                    <input type="text" id="signup-name" required placeholder="e.g., Jordan Lee" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">University (.edu) Email *</label>
+                                    <input type="email" id="signup-email" required placeholder="jordan.lee@university.edu" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Department *</label>
+                                        <select id="signup-dept" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                            <option value="Informatics & Computer Science">Programming &amp; CS</option>
+                                            <option value="Applied Mathematics">Mathematics</option>
+                                            <option value="Electrical & Mechanical Eng">Engineering</option>
+                                            <option value="Modern Languages">Languages</option>
+                                            <option value="Natural Sciences">Science</option>
+                                            <option value="Design & Digital Arts">Design &amp; Arts</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Role *</label>
+                                        <select id="signup-role" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                            <option value="Student">Student</option>
+                                            <option value="Faculty Coordinator">Faculty Coordinator</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Password *</label>
+                                        <input type="password" id="signup-password" minlength="6" required placeholder="Min 6 characters" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Confirm Password *</label>
+                                        <input type="password" id="signup-confirm" minlength="6" required placeholder="Re-enter password" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm shadow-sm transition">
+                                    Create Account &amp; Claim +3 Credits
+                                </button>
+
+                                <p class="text-center text-xs text-slate-600 pt-1">
+                                    Already registered?
+                                    <button type="button" onclick="switchView('login')" class="font-extrabold text-indigo-800 hover:underline ml-1">
+                                        Log In Here
+                                    </button>
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================================
+             VIEW 10: ABOUT US PAGE
+        ===================================================================== -->
+        <section id="view-about" class="view-section hidden">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 text-white py-14 sm:py-16 px-4">
+                <div class="max-w-5xl mx-auto text-center space-y-4">
+                    <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-extrabold uppercase tracking-wider text-emerald-300">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Our Mission &amp; Campus Community
+                    </span>
+                    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                        Making Peer Tutoring <span class="text-emerald-400">Accessible to Every Student.</span>
+                    </h1>
+                    <p class="text-indigo-100 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+                        SwapHour replaces expensive private tutoring with a student-powered time-bank where every hour you spend teaching earns you an hour of 1-on-1 help in any subject.
+                    </p>
+                </div>
+            </div>
+
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+                <!-- 3 Core Pillars -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-3">
+                        <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-800 flex items-center justify-center">
+                            <i data-lucide="coins" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="text-lg font-extrabold text-slate-900">Zero-Cost Time-Banking</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            No credit cards or tutoring fees. Every student starts with 3 free Skill Credits and earns more by mentoring classmates or sharing study guides.
+                        </p>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-3">
+                        <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                            <i data-lucide="book-open-check" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="text-lg font-extrabold text-slate-900">Peer-Verified Resources</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Access open exam cheat sheets, course summaries, and Q&amp;A threads curated by top students and reviewed by faculty coordinators.
+                        </p>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-3">
+                        <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                            <i data-lucide="users" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="text-lg font-extrabold text-slate-900">Built for Campus Life</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                            Meet face-to-face at the campus library or hop into a quick online session right before midterms, lab deadlines, and final exams.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Campus Support & Contact Card -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-2xs">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div class="space-y-2 max-w-xl">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-700">Get In Touch</span>
+                            <h2 class="text-2xl font-extrabold text-slate-900">Campus Support &amp; Inquiries</h2>
+                            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                                Have questions about Skill Credits, faculty course verification, or campus club partnerships? Reach out to our student support desk anytime.
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full md:w-auto">
+                            <a href="mailto:support@swaphour-campus.edu.tw" class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 hover:border-indigo-400 transition flex items-center gap-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-900 text-white flex items-center justify-center shrink-0">
+                                    <i data-lucide="mail" class="w-4 h-4 text-emerald-400"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] font-extrabold uppercase text-indigo-800">Email Support</p>
+                                    <p class="text-xs sm:text-sm font-bold text-slate-900">support@swaphour-campus.edu.tw</p>
+                                </div>
+                            </a>
+
+                            <a href="tel:+88634227151" class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 hover:border-emerald-400 transition flex items-center gap-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                                    <i data-lucide="phone" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] font-extrabold uppercase text-emerald-800">Campus Helpdesk</p>
+                                    <p class="text-xs sm:text-sm font-bold text-slate-900">+886 3-422-7151</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive FAQ Accordion -->
+                <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-2xs space-y-4">
+                    <div>
+                        <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">Quick Answers</span>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Frequently Asked Questions</h2>
+                    </div>
+
+                    <div class="divide-y divide-slate-100">
+                        <div class="py-3.5">
+                            <button type="button" onclick="toggleFaqItem(1)" class="w-full flex items-center justify-between text-left gap-4">
+                                <span class="text-sm font-bold text-slate-900">How do I earn more Skill Credits if I run out?</span>
+                                <i id="faq-icon-1" data-lucide="chevron-down" class="w-4 h-4 text-slate-500 transition-transform"></i>
+                            </button>
+                            <p id="faq-body-1" class="hidden text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+                                You can earn +1 Skill Credit whenever you host a 1-hour peer tutoring session or upload a verified study guide to the Open Notes Library.
+                            </p>
+                        </div>
+
+                        <div class="py-3.5">
+                            <button type="button" onclick="toggleFaqItem(2)" class="w-full flex items-center justify-between text-left gap-4">
+                                <span class="text-sm font-bold text-slate-900">What happens if I need to cancel a booked session?</span>
+                                <i id="faq-icon-2" data-lucide="chevron-down" class="w-4 h-4 text-slate-500 transition-transform"></i>
+                            </button>
+                            <p id="faq-body-2" class="hidden text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+                                Open My Dashboard and click "Cancel &amp; Refund" on any upcoming session to immediately return 1 Skill Credit back to your wallet.
+                            </p>
+                        </div>
+
+                        <div class="py-3.5">
+                            <button type="button" onclick="toggleFaqItem(3)" class="w-full flex items-center justify-between text-left gap-4">
+                                <span class="text-sm font-bold text-slate-900">Can I meet my peer tutor in person on campus?</span>
+                                <i id="faq-icon-3" data-lucide="chevron-down" class="w-4 h-4 text-slate-500 transition-transform"></i>
+                            </button>
+                            <p id="faq-body-3" class="hidden text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+                                Yes! Each listing specifies whether the session takes place at the Campus Library or online via Google Meet, and you can coordinate exact table locations in the Session Prep Chat.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-white border-t border-slate-200 mt-16 py-8 px-4">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <div class="flex items-center gap-2">
+                <span class="font-extrabold text-indigo-950 text-sm">SwapHour</span>
+                <span>•</span>
+                <span>Peer-to-Peer Campus Tutoring &amp; Open Study Resource Network</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-4 font-semibold">
+                <button onclick="switchView('home')" class="hover:text-indigo-900">Home</button>
+                <button onclick="switchView('tutors')" class="hover:text-indigo-900">Find Tutors</button>
+                <button onclick="switchView('notes')" class="hover:text-indigo-900">Open Notes</button>
+                <button onclick="switchView('forum')" class="hover:text-indigo-900">Q&amp;A Forum</button>
+                <button onclick="switchView('about')" class="hover:text-indigo-900">About Us</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- MODAL 1: VIEW TUTOR PROFILE MODAL -->
+    <div id="modal-tutor-profile" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3.5">
+                    <div id="tp-avatar" class="w-14 h-14 rounded-2xl bg-indigo-900 text-white font-extrabold text-lg flex items-center justify-center">KW</div>
+                    <div>
+                        <h3 id="tp-name" class="text-lg font-extrabold text-slate-900">Kevin Wang</h3>
+                        <p id="tp-dept" class="text-xs text-slate-500">Computer Science • Senior</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span id="tp-rating" class="text-xs font-extrabold text-amber-600">★ 4.9</span>
+                            <span class="text-[11px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">Verified Mentor</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="closeModal('modal-tutor-profile')" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <p id="tp-bio" class="text-xs sm:text-sm text-slate-600 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-100"></p>
+
+            <div>
+                <p class="text-xs font-extrabold uppercase text-slate-500 mb-2">Recent Student Reviews</p>
+                <div id="tp-reviews" class="space-y-2 max-h-44 overflow-y-auto"></div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button onclick="closeModal('modal-tutor-profile')" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">Close</button>
+                <button id="tp-book-btn" class="px-5 py-2 rounded-xl bg-indigo-900 hover:bg-emerald-600 text-white text-xs font-bold transition">Book Session (1 Credit)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: PREVIEW STUDY NOTE MODAL -->
+    <div id="modal-preview-note" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+                <div>
+                    <span id="pn-badge" class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-900">CS204</span>
+                    <h3 id="pn-title" class="text-lg font-extrabold text-slate-900 mt-1">Study Note Title</h3>
+                    <p id="pn-meta" class="text-xs text-slate-500">By Author</p>
+                </div>
+                <button onclick="closeModal('modal-preview-note')" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="pn-content" class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line max-h-80 overflow-y-auto font-sans"></div>
+            <div class="flex items-center justify-between pt-2">
+                <span class="text-xs font-bold text-emerald-700">Free Open Campus Resource</span>
+                <button onclick="closeModal('modal-preview-note'); showToast('Study guide saved to your downloads!')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i> Download Study Guide
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: UPLOAD STUDY NOTE MODAL -->
+    <div id="modal-upload-note" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <span class="text-[11px] font-extrabold uppercase text-emerald-600">Earn +1 Skill Credit</span>
+                    <h3 class="text-lg font-extrabold text-slate-900">Upload Study Note</h3>
+                </div>
+                <button onclick="closeModal('modal-upload-note')" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="upload-note-form" onsubmit="handleUploadNote(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Note Title *</label>
+                    <input type="text" id="un-title" required placeholder="e.g., Linear Algebra Eigenvalues Exam Cheat Sheet" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Subject *</label>
+                        <select id="un-subject" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="Programming & CS">Programming &amp; CS</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Languages">Languages</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Science">Science</option>
+                            <option value="Design & Arts">Design &amp; Arts</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Course Code *</label>
+                        <input type="text" id="un-course" required placeholder="e.g., MATH205" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Formatted Study Content *</label>
+                    <textarea id="un-content" rows="4" required placeholder="Paste key formulas, definitions, or structured study notes..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-upload-note')" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold">Publish &amp; Earn +1 Cr</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 4: ASK QUESTION MODAL (FORUM) -->
+    <div id="modal-ask-question" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-extrabold text-slate-900">Ask the Campus Community</h3>
+                <button onclick="closeModal('modal-ask-question')" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="ask-question-form" onsubmit="handleAskQuestion(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Subject Category *</label>
+                    <select id="aq-category" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                        <option value="Programming & CS">Programming &amp; CS</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Languages">Languages</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Question Title *</label>
+                    <input type="text" id="aq-title" required placeholder="e.g., How do I prevent memory leaks when deleting nodes in a C++ Linked List?" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Details &amp; Context *</label>
+                    <textarea id="aq-body" rows="3" required placeholder="Share what you have tried so far..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-ask-question')" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold">Post Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 5: SESSION CHAT / PREP ROOM MODAL -->
+    <div id="modal-session-chat" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 flex flex-col max-h-[85vh]">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase text-emerald-600">Session Prep Room</span>
+                    <h3 id="chat-session-title" class="text-sm font-extrabold text-slate-900">Session Chat</h3>
+                </div>
+                <button onclick="closeModal('modal-session-chat')" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="chat-messages-box" class="flex-grow overflow-y-auto py-4 space-y-3 min-h-[200px]">
+                <!-- Messages rendered via JS -->
+            </div>
+            <form onsubmit="handleSendChatMessage(event)" class="pt-3 border-t border-slate-100 flex gap-2">
+                <input type="text" id="chat-input" required placeholder="Coordinate meetup spot or share syllabus topic..." class="flex-grow px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-900 text-white text-xs font-bold hover:bg-indigo-800">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 6: COMPLETE & RATE TUTOR MODAL -->
+    <div id="modal-rate-tutor" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-extrabold text-slate-900">Complete &amp; Rate Mentor</h3>
+                <button onclick="closeModal('modal-rate-tutor')" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p id="rate-session-label" class="text-xs text-slate-600">Confirm completion to release 1 Skill Credit to your tutor.</p>
+
+            <form onsubmit="handleCompleteAndRate(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Select Star Rating (1–5) *</label>
+                    <div class="flex gap-2" id="star-selector">
+                        <button type="button" onclick="setStarRating(1)" class="star-btn px-3 py-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-600 font-bold text-xs">1 ★</button>
+                        <button type="button" onclick="setStarRating(2)" class="star-btn px-3 py-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-600 font-bold text-xs">2 ★</button>
+                        <button type="button" onclick="setStarRating(3)" class="star-btn px-3 py-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-600 font-bold text-xs">3 ★</button>
+                        <button type="button" onclick="setStarRating(4)" class="star-btn px-3 py-2 rounded-xl border border-amber-300 bg-amber-50 text-amber-600 font-bold text-xs">4 ★</button>
+                        <button type="button" onclick="setStarRating(5)" class="star-btn px-3 py-2 rounded-xl border-2 border-amber-500 bg-amber-100 text-amber-800 font-extrabold text-xs">5 ★</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1.5">Written Feedback *</label>
+                    <textarea id="rate-review-text" rows="3" required placeholder="How helpful was your peer tutor?" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">Super clear explanations and great practice examples!</textarea>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('modal-rate-tutor')" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">Submit Rating &amp; Complete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== TOAST NOTIFICATION CONTAINER ==================== -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ==================== APPLICATION JAVASCRIPT ==================== -->
+    <script>
+        // =========================================================================
+        // 1. SEED DATA & LOCALSTORAGE STATE MANAGEMENT
+        // =========================================================================
+        const STORAGE_KEY = 'swaphour_full_state_v2';
+
+        const INITIAL_DATA = {
+            accounts: [
+                {
+                    name: 'Alex Lin',
+                    email: 'alex.lin@university.edu',
+                    password: 'demo123',
+                    dept: 'Informatics & Computer Science',
+                    role: 'Student',
+                    initials: 'AL',
+                    credits: 3,
+                    bio: 'Junior CS student passionate about full-stack web dev, algorithms, and helping freshmen survive intro programming.',
+                    skills: ['Python', 'Data Structures', 'SQL', 'Web Development']
+                },
+                {
+                    name: 'Dr. Sarah Chen',
+                    email: 'sarah.chen@university.edu',
+                    password: 'demo123',
+                    dept: 'Academic Advising & Computer Science',
+                    role: 'Faculty Coordinator',
+                    initials: 'SC',
+                    credits: 12,
+                    bio: 'Faculty advisor overseeing peer-assisted learning initiatives and open educational resources.',
+                    skills: ['Software Engineering', 'Academic Advising', 'Algorithms']
+                }
+            ],
+            activeEmail: 'alex.lin@university.edu',
+            stats: {
+                tutors: 198,
+                sessions: 684,
+                notes: 342,
+                credits: 1420
+            },
+            sessions: [
+                {
+                    id: 101,
+                    title: 'WEB301 Full-Stack Web Programming: HTML5, Tailwind & REST APIs',
+                    category: 'Programming & CS',
+                    level: 'Intermediate',
+                    format: 'Campus Library',
+                    datetime: 'Tomorrow, 1:30 PM – 2:30 PM',
+                    mentorName: 'Ryan Hsu',
+                    mentorEmail: 'ryan.hsu@university.edu',
+                    mentorDept: 'Information Management • Senior',
+                    mentorBio: 'Full-stack teaching assistant helping student teams build responsive web apps, JavaScript CRUD logic, and clean REST APIs.',
+                    rating: 5.0,
+                    reviewCount: 31,
+                    desc: 'Hands-on walkthrough of responsive CSS Grid/Flexbox layouts, DOM manipulation, Fetch API async calls, and localStorage state.',
+                    reviews: [
+                        { author: 'Claire W.', stars: 5, text: 'Helped our entire team debug our final web project in one session!' },
+                        { author: 'Ethan C.', stars: 5, text: 'Super clear explanation of async/await and responsive Tailwind grids.' }
+                    ]
+                },
+                {
+                    id: 107,
+                    title: 'WEB102 Modern JavaScript ES6+, DOM Events & Frontend Architecture',
+                    category: 'Programming & CS',
+                    level: 'Beginner / Intro',
+                    format: 'Online (Google Meet)',
+                    datetime: 'Wednesday, 6:00 PM – 7:00 PM',
+                    mentorName: 'Grace Tsai',
+                    mentorEmail: 'grace.tsai@university.edu',
+                    mentorDept: 'Computer Science • Junior',
+                    mentorBio: 'Frontend developer and Web Club lead. I help beginners master vanilla JS, form validation, and interactive UI components.',
+                    rating: 4.9,
+                    reviewCount: 22,
+                    desc: 'Build interactive forms, modal dialogs, dynamic search filters, and clean single-page navigation from scratch.',
+                    reviews: [
+                        { author: 'Daniel L.', stars: 5, text: 'Best intro to JavaScript event listeners and array methods!' }
+                    ]
+                },
+                {
+                    id: 108,
+                    title: 'CS204 Data Structures: Pointers, Trees & Recursion',
+                    category: 'Programming & CS',
+                    level: 'Intermediate',
+                    format: 'Campus Library',
+                    datetime: 'Tomorrow, 2:00 PM – 3:00 PM',
+                    mentorName: 'Kevin Wang',
+                    mentorEmail: 'kevin.wang@university.edu',
+                    mentorDept: 'Computer Science • Senior',
+                    mentorBio: 'TA for CS102/CS204. I break down memory pointers and recursive trees using visual diagrams.',
+                    rating: 4.9,
+                    reviewCount: 28,
+                    desc: 'Hands-on debugging of binary search trees, linked list pointer manipulation, and recursion tracing.',
+                    reviews: [
+                        { author: 'Mia K.', stars: 5, text: 'Finally understood pointer dereferencing in 45 minutes!' },
+                        { author: 'Devon R.', stars: 5, text: 'Patient, well-prepared, and brought great practice problems.' }
+                    ]
+                },
+                {
+                    id: 102,
+                    title: 'MATH202 Calculus II: Integration & Series Convergence',
+                    category: 'Mathematics',
+                    level: 'Exam Prep / Advanced',
+                    format: 'Campus Library',
+                    datetime: 'Thursday, 4:30 PM – 5:30 PM',
+                    mentorName: 'Priya Nair',
+                    mentorEmail: 'priya.nair@university.edu',
+                    mentorDept: 'Applied Mathematics • Junior',
+                    mentorBio: 'Math club peer tutor specializing in Calculus II, Linear Algebra, and Differential Equations.',
+                    rating: 5.0,
+                    reviewCount: 34,
+                    desc: 'Master trig substitution, partial fractions, and Taylor/Maclaurin series tests before midterms.',
+                    reviews: [
+                        { author: 'Lucas T.', stars: 5, text: 'Raised my midterm score by 18 points!' }
+                    ]
+                },
+                {
+                    id: 103,
+                    title: 'ENG205 Academic English & Presentation Coaching',
+                    category: 'Languages',
+                    level: 'Beginner / Intro',
+                    format: 'Online (Google Meet)',
+                    datetime: 'Friday, 1:00 PM – 2:00 PM',
+                    mentorName: 'Emily Carter',
+                    mentorEmail: 'emily.carter@university.edu',
+                    mentorDept: 'Modern Languages • Senior',
+                    mentorBio: 'Writing center fellow helping students polish project pitches, essays, and conversational fluency.',
+                    rating: 4.8,
+                    reviewCount: 19,
+                    desc: '1-on-1 speaking rehearsal, slide delivery pacing, and academic essay structure feedback.',
+                    reviews: [
+                        { author: 'Kenji S.', stars: 5, text: 'Super encouraging and gave actionable speaking tips.' }
+                    ]
+                },
+                {
+                    id: 104,
+                    title: 'EE210 Circuit Analysis & Nodal/Mesh Theorems',
+                    category: 'Engineering',
+                    level: 'Intermediate',
+                    format: 'Campus Library',
+                    datetime: 'Saturday, 10:00 AM – 11:00 AM',
+                    mentorName: 'Marcus Tan',
+                    mentorEmail: 'marcus.tan@university.edu',
+                    mentorDept: 'Electrical Engineering • Senior',
+                    mentorBio: 'IEEE student chapter mentor. Happy to help with circuit labs and SPICE simulations.',
+                    rating: 4.9,
+                    reviewCount: 21,
+                    desc: 'Step-by-step solving of Thevenin/Norton equivalents, op-amps, and first-order RC/RL circuits.',
+                    reviews: [
+                        { author: 'Hana L.', stars: 5, text: 'Made nodal analysis click immediately.' }
+                    ]
+                },
+                {
+                    id: 105,
+                    title: 'CHEM105 Organic Chemistry Reaction Mechanisms',
+                    category: 'Science',
+                    level: 'Intermediate',
+                    format: 'Online (Google Meet)',
+                    datetime: 'Sunday, 3:00 PM – 4:00 PM',
+                    mentorName: 'Sophia Patel',
+                    mentorEmail: 'sophia.patel@university.edu',
+                    mentorDept: 'Biochemistry • Junior',
+                    mentorBio: 'Pre-med peer mentor focused on SN1/SN2/E1/E2 mechanisms and spectroscopy.',
+                    rating: 4.9,
+                    reviewCount: 25,
+                    desc: 'Visual arrow-pushing practice for substitution and elimination reactions plus NMR basics.',
+                    reviews: [
+                        { author: 'Noah B.', stars: 5, text: 'Best Orgo study session on campus.' }
+                    ]
+                },
+                {
+                    id: 106,
+                    title: 'DES120 UI/UX Wireframing & Figma Prototyping',
+                    category: 'Design & Arts',
+                    level: 'Beginner / Intro',
+                    format: 'Online (Google Meet)',
+                    datetime: 'Monday, 5:00 PM – 6:00 PM',
+                    mentorName: 'Chloe Zhang',
+                    mentorEmail: 'chloe.zhang@university.edu',
+                    mentorDept: 'Design & Digital Arts • Junior',
+                    mentorBio: 'Product design intern helping CS & engineering teams turn ideas into clean prototypes.',
+                    rating: 5.0,
+                    reviewCount: 17,
+                    desc: 'Learn Figma auto-layout, responsive grids, and interactive component states in one hour.',
+                    reviews: [
+                        { author: 'Alex Lin', stars: 5, text: 'Helped our team design our web app wireframes!' }
+                    ]
+                }
+            ],
+            bookings: [
+                {
+                    id: 501,
+                    sessionId: 106,
+                    sessionTitle: 'DES120 UI/UX Wireframing & Figma Prototyping',
+                    mentorName: 'Chloe Zhang',
+                    learnerEmail: 'alex.lin@university.edu',
+                    datetime: 'Monday, 5:00 PM – 6:00 PM',
+                    format: 'Online (Google Meet)',
+                    status: 'Upcoming',
+                    chat: [
+                        { sender: 'Chloe Zhang', time: '10:15 AM', text: 'Hi Alex! Excited for our session. Feel free to bring any rough sketches you want to wireframe.' },
+                        { sender: 'Alex Lin', time: '10:22 AM', text: 'Thanks Chloe! I will bring our 4 main page layouts.' }
+                    ]
+                }
+            ],
+            notes: [
+                {
+                    id: 301,
+                    course: 'CS204',
+                    title: 'Data Structures & Big-O Complexity Master Sheet',
+                    subject: 'Programming & CS',
+                    author: 'Kevin Wang',
+                    upvotes: 54,
+                    upvotedBy: [],
+                    verified: true,
+                    content: '1. Array vs Linked List:\n- Array: O(1) random access, O(n) insertion/deletion.\n- Doubly Linked List: O(1) insert/delete at head/tail, O(n) search.\n\n2. Binary Search Trees (BST):\n- Average Search/Insert/Delete: O(log n)\n- Worst-case (skewed): O(n) -> Use AVL or Red-Black Tree to guarantee O(log n).\n\n3. Graph Traversals:\n- BFS uses a Queue (shortest unweighted path).\n- DFS uses a Stack / Recursion (cycle detection, topological sort).'
+                },
+                {
+                    id: 302,
+                    course: 'MATH202',
+                    title: 'Calculus II Integration & Series Convergence Checklist',
+                    subject: 'Mathematics',
+                    author: 'Priya Nair',
+                    upvotes: 68,
+                    upvotedBy: [],
+                    verified: true,
+                    content: 'Integration Strategy:\n1. Check basic u-substitution first.\n2. Product of algebraic & transcendental -> Integration by Parts (LIATE rule).\n3. Rational functions -> Polynomial long division + Partial Fractions.\n\nInfinite Series Quick Tests:\n- Divergence Test: If lim(a_n) != 0, diverges.\n- Geometric Series: |r| < 1 converges to a / (1 - r).\n- Ratio Test: Best for factorials (n!) and exponentials (c^n).'
+                },
+                {
+                    id: 303,
+                    course: 'WEB301',
+                    title: 'Full-Stack Web Programming & REST API Architecture Notes',
+                    subject: 'Programming & CS',
+                    author: 'Alex Lin',
+                    upvotes: 41,
+                    upvotedBy: [],
+                    verified: true,
+                    content: 'HTTP Methods & CRUD Mapping:\n- GET /api/items -> Read list\n- POST /api/items -> Create resource (201 Created)\n- PUT/PATCH /api/items/:id -> Update resource\n- DELETE /api/items/:id -> Remove resource\n\nResponsive Layout Tips:\n- Use CSS Grid (grid-cols-1 md:grid-cols-3) for card directories.\n- Always validate form inputs on both client and server.'
+                },
+                {
+                    id: 304,
+                    course: 'EE210',
+                    title: 'Thevenin & Norton Equivalent Circuits Step-by-Step',
+                    subject: 'Engineering',
+                    author: 'Marcus Tan',
+                    upvotes: 29,
+                    upvotedBy: [],
+                    verified: false,
+                    content: 'Finding Thevenin Equivalent:\nStep 1: Remove the load resistor R_L across terminals A-B.\nStep 2: Calculate V_th = open-circuit voltage V_AB using nodal/mesh analysis.\nStep 3: Zero all independent sources (voltage = short, current = open) and compute R_th.'
+                }
+            ],
+            forumPosts: [
+                {
+                    id: 701,
+                    category: 'Programming & CS',
+                    title: 'How to avoid segmentation faults when deleting a node in a C++ Binary Search Tree?',
+                    body: 'When my remove() function deletes a node with two children, I find the inorder successor, copy its value, and recursively delete the successor—but sometimes it crashes on leaf nodes. Any tips?',
+                    author: 'Devon R.',
+                    time: '2 hours ago',
+                    answers: [
+                        { author: 'Kevin Wang', time: '1 hour ago', text: 'Make sure you pass the root pointer by reference (Node*& root) or return the updated subtree pointer! Otherwise the parent still points to freed memory.' },
+                        { author: 'Alex Lin', time: '40 mins ago', text: 'Also remember to set deleted pointers to nullptr and check `if (!root) return nullptr;` as your base case.' }
+                    ]
+                },
+                {
+                    id: 702,
+                    category: 'Mathematics',
+                    title: 'When should I use the Ratio Test vs. Root Test for infinite series?',
+                    body: 'Preparing for Friday’s Calculus II quiz and I always hesitate between Ratio and Root tests when there are exponents.',
+                    author: 'Lucas T.',
+                    time: '5 hours ago',
+                    answers: [
+                        { author: 'Priya Nair', time: '3 hours ago', text: 'Rule of thumb: If the entire term is raised to the n-th power like ((2n+1)/(3n-2))^n, use the Root Test. If there are factorials (n!) or mixed products, use the Ratio Test!' }
+                    ]
+                },
+                {
+                    id: 703,
+                    category: 'Languages',
+                    title: 'Tips for keeping a technical group demo strictly under 8 minutes?',
+                    body: 'Our web programming team has 4 members and a 5–10 minute strict limit tomorrow. How should we divide speaking roles?',
+                    author: 'Hana L.',
+                    time: '1 day ago',
+                    answers: [
+                        { author: 'Emily Carter', time: '20 hours ago', text: 'Assign 1 speaker for Problem & Plan (2 mins), 1–2 speakers for Live Demo (4 mins), and 1 speaker for Architecture & Future Roadmap (2 mins). Rehearse with a stopwatch!' }
+                    ]
+                }
+            ],
+            ledger: [
+                { id: 1, email: 'alex.lin@university.edu', reason: 'Welcome Starter Bonus (+3 Credits)', time: 'Account Created', delta: '+3 Cr', type: 'earn' },
+                { id: 2, email: 'alex.lin@university.edu', reason: 'Uploaded Study Note: Full-Stack Web Programming Notes', time: '2 days ago', delta: '+1 Cr', type: 'earn' },
+                { id: 3, email: 'alex.lin@university.edu', reason: 'Booked Session: DES120 UI/UX Wireframing (Chloe Zhang)', time: 'Yesterday', delta: '-1 Cr', type: 'spend' }
+            ]
+        };
+
+        let appState = null;
+        let selectedTutorCategory = 'All';
+        let selectedForumCategory = 'All';
+        let activeChatBookingId = null;
+        let activeRatingBookingId = null;
+        let selectedStarRating = 5;
+        let pendingAuthRedirect = null;
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    appState = JSON.parse(raw);
+                } else {
+                    appState = JSON.parse(JSON.stringify(INITIAL_DATA));
+                    saveState();
+                }
+            } catch (e) {
+                appState = JSON.parse(JSON.stringify(INITIAL_DATA));
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (e) {
+                // Ignore sandbox storage errors
+            }
+        }
+
+        function getCurrentUser() {
+            if (!appState.activeEmail) return null;
+            return appState.accounts.find(a => a.email === appState.activeEmail) || null;
+        }
+
+        function resetDemoData() {
+            appState = JSON.parse(JSON.stringify(INITIAL_DATA));
+            saveState();
+            updateNavbarUI();
+            switchView('home');
+            showToast('Demo data has been reset to factory defaults!');
+        }
+
+        // =========================================================================
+        // 2. NAVIGATION & ROUTE PROTECTION
+        // =========================================================================
+        function switchView(viewName) {
+            const user = getCurrentUser();
+            const protectedViews = ['offer', 'dashboard', 'profile'];
+            if (protectedViews.includes(viewName) && !user) {
+                pendingAuthRedirect = viewName;
+                const notice = document.getElementById('login-auth-notice');
+                const noticeText = document.getElementById('login-auth-notice-text');
+                noticeText.textContent = 'Please log in or create a free account to access that page.';
+                notice.classList.remove('hidden');
+                viewName = 'login';
+            }
+
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
+            const target = document.getElementById(`view-${viewName}`);
+            if (target) target.classList.remove('hidden');
+
+            // Hide top navigation tabs on Login and Sign Up pages
+            const isAuthPage = viewName === 'login' || viewName === 'signup';
+            const desktopNav = document.getElementById('desktop-main-nav');
+            const mobileToggle = document.getElementById('mobile-menu-toggle');
+            const mobileDrawer = document.getElementById('mobile-menu');
+            if (desktopNav) {
+                desktopNav.classList.toggle('hidden', isAuthPage);
+                desktopNav.classList.toggle('xl:flex', !isAuthPage);
+            }
+            if (mobileToggle) {
+                mobileToggle.classList.toggle('hidden', isAuthPage);
+            }
+            if (mobileDrawer && isAuthPage) {
+                mobileDrawer.classList.add('hidden');
+            }
+
+            // Update desktop active nav styling
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.id === 'nav-architecture') {
+                    btn.classList.remove('ring-2', 'ring-emerald-500');
+                } else {
+                    btn.classList.remove('bg-indigo-50', 'text-indigo-900', 'font-bold');
+                    btn.classList.add('text-slate-600', 'font-semibold');
+                }
+            });
+
+            const activeBtn = document.getElementById(`nav-${viewName}`);
+            if (activeBtn) {
+                if (viewName === 'architecture') {
+                    activeBtn.classList.add('ring-2', 'ring-emerald-500');
+                } else {
+                    activeBtn.classList.add('bg-indigo-50', 'text-indigo-900', 'font-bold');
+                    activeBtn.classList.remove('text-slate-600', 'font-semibold');
+                }
+            }
+
+            // Render view-specific data
+            if (viewName === 'home') renderHomeView();
+            if (viewName === 'tutors') renderTutorsDirectory();
+            if (viewName === 'offer' && user) {
+                document.getElementById('offer-mentor-display').textContent = `${user.name} (${user.dept})`;
+                updateOfferPreview();
+            }
+            if (viewName === 'notes') renderNotesLibrary();
+            if (viewName === 'forum') renderForum();
+            if (viewName === 'dashboard' && user) renderDashboard();
+            if (viewName === 'profile' && user) renderProfilePage();
+
+            if (window.lucide) lucide.createIcons();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function updateNavbarUI() {
+            const user = getCurrentUser();
+            const loggedInGroup = document.getElementById('nav-loggedin-group');
+            const loggedOutGroup = document.getElementById('nav-loggedout-group');
+
+            if (user) {
+                loggedInGroup.classList.remove('hidden');
+                loggedInGroup.classList.add('flex');
+                loggedOutGroup.classList.add('hidden');
+                loggedOutGroup.classList.remove('flex');
+
+                document.getElementById('nav-credits').textContent = user.credits;
+                document.getElementById('nav-avatar').textContent = user.initials;
+                document.getElementById('nav-username').textContent = user.name;
+                document.getElementById('nav-userrole').textContent = user.role;
+            } else {
+                loggedInGroup.classList.add('hidden');
+                loggedInGroup.classList.remove('flex');
+                loggedOutGroup.classList.remove('hidden');
+                loggedOutGroup.classList.add('flex');
+            }
+        }
+
+        // =========================================================================
+        // 3. AUTHENTICATION (LOGIN, SIGN UP, LOG OUT)
+        // =========================================================================
+        function quickDemoLogin(email) {
+            appState.activeEmail = email;
+            saveState();
+            updateNavbarUI();
+            document.getElementById('login-auth-notice').classList.add('hidden');
+            document.getElementById('login-error').classList.add('hidden');
+            const user = getCurrentUser();
+            showToast(`Signed in as ${user.name} (${user.role})`);
+            const dest = pendingAuthRedirect || 'dashboard';
+            pendingAuthRedirect = null;
+            switchView(dest);
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+            const errBox = document.getElementById('login-error');
+
+            const account = appState.accounts.find(a => a.email.toLowerCase() === email && a.password === password);
+            if (!account) {
+                errBox.textContent = 'Invalid email or password. Use demo password "demo123" or the 1-Click Demo buttons above.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            errBox.classList.add('hidden');
+            document.getElementById('login-auth-notice').classList.add('hidden');
+            appState.activeEmail = account.email;
+            saveState();
+            updateNavbarUI();
+            document.getElementById('login-form').reset();
+
+            showToast(`Welcome back, ${account.name}!`);
+            const dest = pendingAuthRedirect || 'dashboard';
+            pendingAuthRedirect = null;
+            switchView(dest);
+        }
+
+        function handleSignup(e) {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim().toLowerCase();
+            const dept = document.getElementById('signup-dept').value;
+            const role = document.getElementById('signup-role').value;
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+            const errBox = document.getElementById('signup-error');
+
+            if (password !== confirm) {
+                errBox.textContent = 'Passwords do not match. Please try again.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            if (appState.accounts.some(a => a.email.toLowerCase() === email)) {
+                errBox.textContent = 'An account with this email already exists. Please log in.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            errBox.classList.add('hidden');
+            const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            const newAccount = {
+                name,
+                email,
+                password,
+                dept,
+                role,
+                initials,
+                credits: 3,
+                bio: `${role} in ${dept} participating in peer tutoring and study resource sharing.`,
+                skills: ['Peer Learning', dept.split(' ')[0]]
+            };
+
+            appState.accounts.push(newAccount);
+            appState.activeEmail = newAccount.email;
+            appState.stats.tutors += 1;
+
+            appState.ledger.unshift({
+                id: Date.now(),
+                email: newAccount.email,
+                reason: 'Welcome Starter Bonus (+3 Skill Credits)',
+                time: 'Just now',
+                delta: '+3 Cr',
+                type: 'earn'
+            });
+
+            saveState();
+            updateNavbarUI();
+            document.getElementById('signup-form').reset();
+
+            showToast(`Welcome to SwapHour, ${name}! +3 Skill Credits added.`);
+            const dest = pendingAuthRedirect || 'dashboard';
+            pendingAuthRedirect = null;
+            switchView(dest);
+        }
+
+        function handleLogout() {
+            const user = getCurrentUser();
+            appState.activeEmail = null;
+            saveState();
+            updateNavbarUI();
+            showToast(`Logged out${user ? ' of ' + user.name : ''}.`);
+            switchView('login');
+        }
+
+        function togglePasswordField(id) {
+            const el = document.getElementById(id);
+            el.type = el.type === 'password' ? 'text' : 'password';
+        }
+
+        // =========================================================================
+        // 4. HOME PAGE RENDERER
+        // =========================================================================
+        function renderHomeView() {
+            document.getElementById('stat-tutors').textContent = appState.stats.tutors.toLocaleString();
+            document.getElementById('stat-sessions').textContent = appState.stats.sessions.toLocaleString();
+            document.getElementById('stat-notes').textContent = appState.stats.notes.toLocaleString();
+            document.getElementById('stat-credits').textContent = appState.stats.credits.toLocaleString();
+
+            const featuredGrid = document.getElementById('home-featured-grid');
+            const featured = appState.sessions.slice(0, 3);
+            featuredGrid.innerHTML = featured.map(s => createSessionCardHTML(s)).join('');
+
+            // Top-Rated Mentors Leaderboard
+            const mentors = [
+                { name: 'Priya Nair', dept: 'Applied Mathematics', rating: '5.0', sessions: 34, badge: 'Top Math Mentor' },
+                { name: 'Kevin Wang', dept: 'Computer Science', rating: '4.9', sessions: 28, badge: 'CS Lab Lead' },
+                { name: 'Sophia Patel', dept: 'Biochemistry', rating: '4.9', sessions: 25, badge: 'Science Star' },
+                { name: 'Alex Lin', dept: 'Informatics & CS', rating: '4.9', sessions: 19, badge: 'Web & Algo Mentor' }
+            ];
+
+            document.getElementById('home-mentors-leaderboard').innerHTML = mentors.map((m, i) => `
+                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-col justify-between gap-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold px-2 py-0.5 rounded-md bg-indigo-900 text-white">#${i + 1}</span>
+                        <span class="text-xs font-extrabold text-amber-600">★ ${m.rating}</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-extrabold text-slate-900">${m.name}</p>
+                        <p class="text-xs text-slate-500">${m.dept}</p>
+                    </div>
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-200/70 text-[11px]">
+                        <span class="font-bold text-emerald-700">${m.badge}</span>
+                        <span class="text-slate-500 font-semibold">${m.sessions} sessions</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // =========================================================================
+        // 5. FIND TUTORS DIRECTORY & BOOKING
+        // =========================================================================
+        function createSessionCardHTML(s) {
+            const user = getCurrentUser();
+            const isOwn = user && s.mentorEmail === user.email;
+            const alreadyBooked = user && appState.bookings.some(b => b.sessionId === s.id && b.learnerEmail === user.email && b.status === 'Upcoming');
+
+            return `
+                <div class="bg-white rounded-2xl border border-slate-200 hover:border-indigo-400 shadow-2xs hover:shadow-md transition flex flex-col justify-between overflow-hidden">
+                    <div class="p-5 space-y-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200">
+                                ${s.category}
+                            </span>
+                            <span class="text-xs font-extrabold text-amber-600 flex items-center gap-1">
+                                ★ ${Number(s.rating).toFixed(1)} <span class="text-slate-400 font-normal">(${s.reviewCount})</span>
+                            </span>
+                        </div>
+
+                        <div>
+                            <h3 class="text-base font-extrabold text-slate-900 leading-snug">${s.title}</h3>
+                            <p class="text-xs text-slate-600 mt-1.5 line-clamp-2 leading-relaxed">${s.desc}</p>
+                        </div>
+
+                        <!-- Mentor Row -->
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-8 h-8 rounded-full bg-indigo-900 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                                    ${s.mentorName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-extrabold text-slate-900 truncate">${s.mentorName}</p>
+                                    <p class="text-[10px] text-slate-500 truncate">${s.mentorDept}</p>
+                                </div>
+                            </div>
+                            <button onclick="openTutorProfileModal(${s.id})" class="text-[11px] font-bold text-indigo-700 hover:underline shrink-0">
+                                View Profile
+                            </button>
+                        </div>
+
+                        <div class="space-y-1 text-xs text-slate-600 pt-1">
+                            <p class="flex items-center gap-2"><i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-600"></i> <span class="font-semibold">${s.datetime}</span></p>
+                            <p class="flex items-center gap-2"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-indigo-600"></i> <span>${s.format} • ${s.level}</span></p>
+                        </div>
+                    </div>
+
+                    <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <span class="font-mono text-xs font-extrabold text-amber-950 bg-amber-100/80 px-2.5 py-1 rounded-lg">
+                            1 Credit / hr
+                        </span>
+
+                        ${isOwn
+                            ? `<span class="text-xs font-bold text-slate-500 bg-slate-200/80 px-3 py-2 rounded-xl">Your Listing</span>`
+                            : alreadyBooked
+                                ? `<button onclick="switchView('dashboard')" class="px-3.5 py-2 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-extrabold">Booked ✓</button>`
+                                : `<button onclick="bookTutoringSession(${s.id})" class="px-4 py-2 rounded-xl bg-indigo-900 hover:bg-emerald-600 text-white text-xs font-bold shadow-2xs transition">
+                                    Book Session (1 Credit)
+                                   </button>`
+                        }
+                    </div>
+                </div>
+            `;
+        }
+
+        function setTutorCategory(cat) {
+            selectedTutorCategory = cat;
+            document.querySelectorAll('.tcat-pill').forEach(btn => {
+                if (btn.dataset.cat === cat) {
+                    btn.classList.remove('bg-slate-100', 'text-slate-700');
+                    btn.classList.add('bg-indigo-900', 'text-white');
+                } else {
+                    btn.classList.add('bg-slate-100', 'text-slate-700');
+                    btn.classList.remove('bg-indigo-900', 'text-white');
+                }
+            });
+            renderTutorsDirectory();
+        }
+
+        function renderTutorsDirectory() {
+            const q = document.getElementById('tutor-search-input').value.toLowerCase().trim();
+            const sortBy = document.getElementById('tutor-sort-select').value;
+
+            let list = appState.sessions.filter(s => {
+                const matchCat = selectedTutorCategory === 'All' || s.category === selectedTutorCategory;
+                const matchQ = !q ||
+                    s.title.toLowerCase().includes(q) ||
+                    s.mentorName.toLowerCase().includes(q) ||
+                    s.category.toLowerCase().includes(q) ||
+                    s.desc.toLowerCase().includes(q);
+                return matchCat && matchQ;
+            });
+
+            if (sortBy === 'rating') list.sort((a, b) => b.rating - a.rating);
+            if (sortBy === 'recent') list.sort((a, b) => b.id - a.id);
+            if (sortBy === 'subject') list.sort((a, b) => a.category.localeCompare(b.category));
+
+            document.getElementById('tutor-directory-count').textContent = `Showing ${list.length} tutoring session${list.length === 1 ? '' : 's'}`;
+            const grid = document.getElementById('tutors-directory-grid');
+
+            if (list.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full bg-white rounded-2xl border border-slate-200 p-12 text-center">
+                        <p class="text-base font-extrabold text-slate-800">No tutoring sessions match your search</p>
+                        <p class="text-xs text-slate-500 mt-1">Try selecting "All" categories or clearing your search box.</p>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = list.map(s => createSessionCardHTML(s)).join('');
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function openTutorProfileModal(sessionId) {
+            const s = appState.sessions.find(x => x.id === sessionId);
+            if (!s) return;
+
+            document.getElementById('tp-avatar').textContent = s.mentorName.split(' ').map(n => n[0]).join('').slice(0, 2);
+            document.getElementById('tp-name').textContent = s.mentorName;
+            document.getElementById('tp-dept').textContent = s.mentorDept;
+            document.getElementById('tp-rating').textContent = `★ ${Number(s.rating).toFixed(1)} (${s.reviewCount} reviews)`;
+            document.getElementById('tp-bio').textContent = s.mentorBio;
+
+            const reviewsEl = document.getElementById('tp-reviews');
+            if (!s.reviews || s.reviews.length === 0) {
+                reviewsEl.innerHTML = `<p class="text-xs text-slate-400">No written reviews yet.</p>`;
+            } else {
+                reviewsEl.innerHTML = s.reviews.map(r => `
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                        <div class="flex justify-between font-bold text-slate-800 mb-1">
+                            <span>${r.author}</span>
+                            <span class="text-amber-500">${'★'.repeat(r.stars)}</span>
+                        </div>
+                        <p class="text-slate-600">${r.text}</p>
+                    </div>
+                `).join('');
+            }
+
+            const bookBtn = document.getElementById('tp-book-btn');
+            bookBtn.onclick = () => {
+                closeModal('modal-tutor-profile');
+                bookTutoringSession(s.id);
+            };
+
+            document.getElementById('modal-tutor-profile').classList.remove('hidden');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function bookTutoringSession(sessionId) {
+            const user = getCurrentUser();
+            if (!user) {
+                pendingAuthRedirect = 'tutors';
+                const notice = document.getElementById('login-auth-notice');
+                document.getElementById('login-auth-notice-text').textContent = 'Please log in or sign up (+3 Free Credits) to book a session.';
+                notice.classList.remove('hidden');
+                switchView('login');
+                return;
+            }
+
+            const session = appState.sessions.find(s => s.id === sessionId);
+            if (!session) return;
+
+            if (user.credits < 1) {
+                showToast('Not enough Skill Credits! Offer a session or upload notes to earn +1 Cr.', 'error');
+                return;
+            }
+
+            user.credits -= 1;
+            appState.stats.credits += 1;
+
+            appState.bookings.unshift({
+                id: Date.now(),
+                sessionId: session.id,
+                sessionTitle: session.title,
+                mentorName: session.mentorName,
+                learnerEmail: user.email,
+                datetime: session.datetime,
+                format: session.format,
+                status: 'Upcoming',
+                chat: [
+                    { sender: session.mentorName, time: 'Just now', text: `Thanks for booking "${session.title}", ${user.name}! Let me know what specific topics you want to focus on.` }
+                ]
+            });
+
+            appState.ledger.unshift({
+                id: Date.now() + 1,
+                email: user.email,
+                reason: `Booked Session: ${session.title} (${session.mentorName})`,
+                time: 'Just now',
+                delta: '-1 Cr',
+                type: 'spend'
+            });
+
+            saveState();
+            updateNavbarUI();
+            renderTutorsDirectory();
+            renderHomeView();
+            showToast(`Booked "${session.title}"! 1 Credit deducted.`);
+        }
+
+        // =========================================================================
+        // 6. OFFER TUTORING PAGE (LIVE PREVIEW + CREATE)
+        // =========================================================================
+        function updateOfferPreview() {
+            const user = getCurrentUser();
+            const title = document.getElementById('offer-title').value.trim() || 'Your Course Title & Topic';
+            const cat = document.getElementById('offer-category').value;
+            const level = document.getElementById('offer-level').value;
+            const format = document.getElementById('offer-format').value;
+            const dt = document.getElementById('offer-datetime').value.trim() || 'Tomorrow, 3:00 PM';
+            const desc = document.getElementById('offer-desc').value.trim() || 'Your session syllabus and topics covered will appear here...';
+            const mentorName = user ? user.name : 'Student Mentor';
+
+            document.getElementById('offer-live-preview').innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200">${cat}</span>
+                    <span class="text-xs font-extrabold text-amber-600">★ 5.0 (New)</span>
+                </div>
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-900">${title}</h3>
+                    <p class="text-xs text-slate-600 mt-1">${desc}</p>
+                </div>
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-800">
+                    Mentor: ${mentorName}
+                </div>
+                <div class="text-xs text-slate-600 space-y-1">
+                    <p>📅 ${dt}</p>
+                    <p>📍 ${format} • ${level}</p>
+                </div>
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <span class="font-mono text-xs font-extrabold text-amber-950 bg-amber-100 px-2.5 py-1 rounded-lg">1 Credit / hr</span>
+                    <span class="text-xs font-bold text-emerald-700">+1 Credit Earned on Completion</span>
+                </div>
+            `;
+        }
+
+        function handleOfferSubmit(e) {
+            e.preventDefault();
+            const user = getCurrentUser();
+            if (!user) return;
+
+            const title = document.getElementById('offer-title').value.trim();
+            const category = document.getElementById('offer-category').value;
+            const level = document.getElementById('offer-level').value;
+            const format = document.getElementById('offer-format').value;
+            const datetime = document.getElementById('offer-datetime').value.trim();
+            const desc = document.getElementById('offer-desc').value.trim();
+
+            appState.sessions.unshift({
+                id: Date.now(),
+                title,
+                category,
+                level,
+                format,
+                datetime,
+                mentorName: user.name,
+                mentorEmail: user.email,
+                mentorDept: user.dept,
+                mentorBio: user.bio,
+                rating: 5.0,
+                reviewCount: 1,
+                desc,
+                reviews: []
+            });
+
+            saveState();
+            document.getElementById('offer-tutoring-form').reset();
+            showToast(`Published "${title}" to the Find Tutors directory!`);
+            switchView('tutors');
+        }
+
+        // =========================================================================
+        // 7. OPEN NOTES LIBRARY
+        // =========================================================================
+        function renderNotesLibrary() {
+            const q = document.getElementById('notes-search-input').value.toLowerCase().trim();
+            const subj = document.getElementById('notes-subject-filter').value;
+            const user = getCurrentUser();
+
+            const list = appState.notes.filter(n => {
+                const matchSubj = subj === 'All' || n.subject === subj;
+                const matchQ = !q ||
+                    n.title.toLowerCase().includes(q) ||
+                    n.course.toLowerCase().includes(q) ||
+                    n.author.toLowerCase().includes(q) ||
+                    n.content.toLowerCase().includes(q);
+                return matchSubj && matchQ;
+            });
+
+            const grid = document.getElementById('notes-library-grid');
+            grid.innerHTML = list.map(n => {
+                const hasUpvoted = user && n.upvotedBy && n.upvotedBy.includes(user.email);
+                return `
+                    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs hover:shadow-md transition flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-2.5">
+                                <span class="font-mono text-xs font-extrabold px-2.5 py-0.5 rounded-lg bg-indigo-50 text-indigo-900 border border-indigo-200">
+                                    ${n.course}
+                                </span>
+                                ${n.verified
+                                    ? `<span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1"><i data-lucide="badge-check" class="w-3 h-3"></i> Verified</span>`
+                                    : `<span class="text-[11px] font-semibold text-slate-400">${n.subject}</span>`
+                                }
+                            </div>
+                            <h3 class="text-base font-extrabold text-slate-900 leading-snug">${n.title}</h3>
+                            <p class="text-xs text-slate-600 mt-2 line-clamp-3 leading-relaxed">${n.content}</p>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                            <span class="text-xs text-slate-500">By <strong class="text-slate-800">${n.author}</strong></span>
+                            <div class="flex items-center gap-2">
+                                <button onclick="toggleNoteUpvote(${n.id})" class="px-2.5 py-1.5 rounded-xl border ${hasUpvoted ? 'bg-emerald-50 border-emerald-400 text-emerald-800' : 'border-slate-200 text-slate-600 hover:bg-slate-50'} text-xs font-bold flex items-center gap-1 transition">
+                                    <i data-lucide="thumbs-up" class="w-3 h-3"></i> ${n.upvotes}
+                                </button>
+                                <button onclick="openPreviewNoteModal(${n.id})" class="px-3 py-1.5 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold transition">
+                                    Preview Note
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function toggleNoteUpvote(noteId) {
+            const user = getCurrentUser();
+            if (!user) {
+                showToast('Log in to upvote helpful study notes!', 'error');
+                return;
+            }
+            const note = appState.notes.find(n => n.id === noteId);
+            if (!note) return;
+            if (!note.upvotedBy) note.upvotedBy = [];
+
+            const idx = note.upvotedBy.indexOf(user.email);
+            if (idx === -1) {
+                note.upvotedBy.push(user.email);
+                note.upvotes += 1;
+            } else {
+                note.upvotedBy.splice(idx, 1);
+                note.upvotes -= 1;
+            }
+            saveState();
+            renderNotesLibrary();
+        }
+
+        function openPreviewNoteModal(noteId) {
+            const n = appState.notes.find(x => x.id === noteId);
+            if (!n) return;
+            document.getElementById('pn-badge').textContent = `${n.course} • ${n.subject}`;
+            document.getElementById('pn-title').textContent = n.title;
+            document.getElementById('pn-meta').textContent = `Shared by ${n.author} • ${n.upvotes} student upvotes`;
+            document.getElementById('pn-content').textContent = n.content;
+            document.getElementById('modal-preview-note').classList.remove('hidden');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function openUploadNoteModal() {
+            const user = getCurrentUser();
+            if (!user) {
+                pendingAuthRedirect = 'notes';
+                document.getElementById('login-auth-notice').classList.remove('hidden');
+                switchView('login');
+                return;
+            }
+            document.getElementById('modal-upload-note').classList.remove('hidden');
+        }
+
+        function handleUploadNote(e) {
+            e.preventDefault();
+            const user = getCurrentUser();
+            if (!user) return;
+
+            const title = document.getElementById('un-title').value.trim();
+            const subject = document.getElementById('un-subject').value;
+            const course = document.getElementById('un-course').value.trim().toUpperCase();
+            const content = document.getElementById('un-content').value.trim();
+
+            appState.notes.unshift({
+                id: Date.now(),
+                course,
+                title,
+                subject,
+                author: user.name,
+                upvotes: 1,
+                upvotedBy: [user.email],
+                verified: user.role === 'Faculty Coordinator',
+                content
+            });
+
+            user.credits += 1;
+            appState.stats.notes += 1;
+            appState.stats.credits += 1;
+
+            appState.ledger.unshift({
+                id: Date.now() + 1,
+                email: user.email,
+                reason: `Uploaded Study Note: ${title} (${course})`,
+                time: 'Just now',
+                delta: '+1 Cr',
+                type: 'earn'
+            });
+
+            saveState();
+            updateNavbarUI();
+            document.getElementById('upload-note-form').reset();
+            closeModal('modal-upload-note');
+            renderNotesLibrary();
+            showToast(`Uploaded "${title}"! Earned +1 Skill Credit.`);
+        }
+
+        // =========================================================================
+        // 8. COMMUNITY Q&A FORUM
+        // =========================================================================
+        function setForumCategory(cat) {
+            selectedForumCategory = cat;
+            document.querySelectorAll('.fcat-pill').forEach(btn => {
+                if (btn.dataset.fcat === cat) {
+                    btn.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+                    btn.classList.add('bg-indigo-900', 'text-white');
+                } else {
+                    btn.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+                    btn.classList.remove('bg-indigo-900', 'text-white');
+                }
+            });
+            renderForum();
+        }
+
+        function renderForum() {
+            const list = appState.forumPosts.filter(p => selectedForumCategory === 'All' || p.category === selectedForumCategory);
+            const container = document.getElementById('forum-threads-list');
+
+            container.innerHTML = list.map(post => `
+                <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs space-y-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200">${post.category}</span>
+                                <span class="text-xs text-slate-400">Posted by <strong class="text-slate-600">${post.author}</strong> • ${post.time}</span>
+                            </div>
+                            <h3 class="text-base sm:text-lg font-extrabold text-slate-900 pt-1">${post.title}</h3>
+                        </div>
+                        <span class="shrink-0 text-xs font-extrabold px-3 py-1 rounded-xl ${post.answers.length > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600'}">
+                            ${post.answers.length} Answer${post.answers.length === 1 ? '' : 's'}
+                        </span>
+                    </div>
+
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">${post.body}</p>
+
+                    <!-- Answers Thread -->
+                    <div class="space-y-2.5 pt-2 border-t border-slate-100">
+                        ${post.answers.map(ans => `
+                            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 text-xs sm:text-sm space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-extrabold text-indigo-950">${ans.author}</span>
+                                    <span class="text-[11px] text-slate-400">${ans.time}</span>
+                                </div>
+                                <p class="text-slate-700 leading-relaxed">${ans.text}</p>
+                            </div>
+                        `).join('')}
+
+                        <!-- Quick Reply Form -->
+                        <form onsubmit="handlePostReply(event, ${post.id})" class="flex gap-2 pt-1">
+                            <input type="text" id="reply-input-${post.id}" required placeholder="Write a helpful answer or explanation..." class="flex-grow px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold shrink-0">
+                                Post Answer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openAskQuestionModal() {
+            const user = getCurrentUser();
+            if (!user) {
+                pendingAuthRedirect = 'forum';
+                document.getElementById('login-auth-notice').classList.remove('hidden');
+                switchView('login');
+                return;
+            }
+            document.getElementById('modal-ask-question').classList.remove('hidden');
+        }
+
+        function handleAskQuestion(e) {
+            e.preventDefault();
+            const user = getCurrentUser();
+            if (!user) return;
+
+            const category = document.getElementById('aq-category').value;
+            const title = document.getElementById('aq-title').value.trim();
+            const body = document.getElementById('aq-body').value.trim();
+
+            appState.forumPosts.unshift({
+                id: Date.now(),
+                category,
+                title,
+                body,
+                author: user.name,
+                time: 'Just now',
+                answers: []
+            });
+
+            saveState();
+            document.getElementById('ask-question-form').reset();
+            closeModal('modal-ask-question');
+            renderForum();
+            showToast('Your question has been posted to the forum!');
+        }
+
+        function handlePostReply(e, postId) {
+            e.preventDefault();
+            const user = getCurrentUser();
+            if (!user) {
+                showToast('Please log in to reply to forum threads.', 'error');
+                return;
+            }
+            const input = document.getElementById(`reply-input-${postId}`);
+            const text = input.value.trim();
+            if (!text) return;
+
+            const post = appState.forumPosts.find(p => p.id === postId);
+            if (!post) return;
+
+            post.answers.push({
+                author: user.name,
+                time: 'Just now',
+                text
+            });
+
+            saveState();
+            renderForum();
+            showToast('Answer posted to thread!');
+        }
+
+        // =========================================================================
+        // 9. MY DASHBOARD (MULTI-TAB WORKSPACE)
+        // =========================================================================
+        function switchDashboardTab(tabName) {
+            document.querySelectorAll('.dpanel').forEach(p => p.classList.add('hidden'));
+            const panel = document.getElementById(`dpanel-${tabName}`);
+            if (panel) panel.classList.remove('hidden');
+
+            document.querySelectorAll('.dtab-btn').forEach(btn => {
+                if (btn.id === 'dtab-faculty') {
+                    btn.classList.remove('ring-2', 'ring-emerald-600');
+                } else {
+                    btn.classList.remove('bg-indigo-900', 'text-white', 'font-bold');
+                    btn.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-700', 'font-semibold');
+                }
+            });
+
+            const activeTab = document.getElementById(`dtab-${tabName}`);
+            if (activeTab) {
+                if (tabName === 'faculty') {
+                    activeTab.classList.add('ring-2', 'ring-emerald-600');
+                } else {
+                    activeTab.classList.add('bg-indigo-900', 'text-white', 'font-bold');
+                    activeTab.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-700', 'font-semibold');
+                }
+            }
+        }
+
+        function renderDashboard() {
+            const user = getCurrentUser();
+            if (!user) return;
+
+            document.getElementById('dash-avatar').textContent = user.initials;
+            document.getElementById('dash-username').textContent = user.name;
+            document.getElementById('dash-role-pill').textContent = user.role;
+            document.getElementById('dash-dept').textContent = user.dept;
+            document.getElementById('dash-wallet-balance').textContent = user.credits;
+
+            // Show/hide Faculty Moderation tab
+            const facTab = document.getElementById('dtab-faculty');
+            if (user.role === 'Faculty Coordinator') {
+                facTab.classList.remove('hidden');
+                facTab.classList.add('flex');
+            } else {
+                facTab.classList.add('hidden');
+                facTab.classList.remove('flex');
+            }
+
+            // Tab 1: Booked Sessions
+            const myBookings = appState.bookings.filter(b => b.learnerEmail === user.email);
+            const bookedContainer = document.getElementById('dash-booked-container');
+            if (myBookings.length === 0) {
+                bookedContainer.innerHTML = `<div class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-xs text-slate-500">You have no booked tutoring sessions yet.</div>`;
+            } else {
+                bookedContainer.innerHTML = myBookings.map(b => {
+                    const statusBadge = b.status === 'Upcoming'
+                        ? 'bg-indigo-100 text-indigo-800'
+                        : b.status === 'Completed'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-slate-200 text-slate-600';
+
+                    return `
+                        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full ${statusBadge}">${b.status}</span>
+                                    <span class="text-xs text-slate-500 font-semibold">${b.datetime}</span>
+                                </div>
+                                <h3 class="text-base font-extrabold text-slate-900">${b.sessionTitle}</h3>
+                                <p class="text-xs text-slate-600">Mentor: <strong>${b.mentorName}</strong> • ${b.format}</p>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button onclick="openSessionChatModal(${b.id})" class="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                                    <i data-lucide="message-circle" class="w-3.5 h-3.5 text-indigo-600"></i> Session Chat (${b.chat.length})
+                                </button>
+
+                                ${b.status === 'Upcoming' ? `
+                                    <button onclick="openRateTutorModal(${b.id})" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">
+                                        Complete &amp; Rate Tutor
+                                    </button>
+                                    <button onclick="cancelBooking(${b.id})" class="px-3 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold">
+                                        Cancel &amp; Refund
+                                    </button>
+                                ` : b.status === 'Completed' ? `
+                                    <span class="text-xs font-extrabold text-amber-600 px-2">Rated ${b.userRating || 5} ★</span>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Tab 2: Sessions I'm Teaching
+            const myTeaching = appState.sessions.filter(s => s.mentorEmail === user.email);
+            const teachingContainer = document.getElementById('dash-teaching-container');
+            if (myTeaching.length === 0) {
+                teachingContainer.innerHTML = `<div class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-xs text-slate-500">You haven't offered any tutoring sessions yet.</div>`;
+            } else {
+                teachingContainer.innerHTML = myTeaching.map(s => `
+                    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <span class="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full">${s.category}</span>
+                            <h3 class="text-base font-extrabold text-slate-900 mt-1">${s.title}</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">${s.datetime} • ${s.format}</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="simulateStudentCompleted(${s.id})" class="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 text-xs font-extrabold flex items-center gap-1.5">
+                                <i data-lucide="coins" class="w-3.5 h-3.5 text-amber-600"></i> Simulate Student Completed (+1 Cr)
+                            </button>
+                            <button onclick="deleteTeachingSession(${s.id})" class="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600" title="Delete Listing">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Tab 3: Credit Ledger
+            const userLedger = appState.ledger.filter(l => l.email === user.email);
+            document.getElementById('dash-ledger-tbody').innerHTML = userLedger.map(tx => `
+                <tr>
+                    <td class="py-3.5 px-5 font-semibold text-slate-800">${tx.reason}</td>
+                    <td class="py-3.5 px-5 text-slate-400 text-xs">${tx.time}</td>
+                    <td class="py-3.5 px-5 text-right font-mono font-extrabold ${tx.type === 'earn' ? 'text-emerald-700' : 'text-amber-800'}">${tx.delta}</td>
+                </tr>
+            `).join('');
+
+            // Tab 4: Faculty Moderation Panel
+            if (user.role === 'Faculty Coordinator') {
+                document.getElementById('fac-verified-count').textContent = appState.notes.filter(n => n.verified).length;
+                document.getElementById('fac-listings-count').textContent = appState.sessions.length;
+                document.getElementById('fac-threads-count').textContent = appState.forumPosts.length;
+
+                document.getElementById('fac-notes-list').innerHTML = appState.notes.map(n => `
+                    <div class="p-3.5 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-xs sm:text-sm font-bold text-slate-900">${n.course}: ${n.title}</p>
+                            <p class="text-[11px] text-slate-500">Author: ${n.author}</p>
+                        </div>
+                        <button onclick="toggleNoteVerified(${n.id})" class="px-3 py-1.5 rounded-lg text-xs font-bold ${n.verified ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700 hover:bg-emerald-50'}">
+                            ${n.verified ? '✓ Verified Badge Active' : 'Verify & Feature'}
+                        </button>
+                    </div>
+                `).join('');
+
+                document.getElementById('fac-forum-list').innerHTML = appState.forumPosts.map(p => `
+                    <div class="p-3.5 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-xs sm:text-sm font-bold text-slate-900">${p.title}</p>
+                            <p class="text-[11px] text-slate-500">By ${p.author} • ${p.answers.length} replies</p>
+                        </div>
+                        <button onclick="deleteForumPost(${p.id})" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold">
+                            Remove Post
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // Session Chat Modal Actions
+        function openSessionChatModal(bookingId) {
+            activeChatBookingId = bookingId;
+            const booking = appState.bookings.find(b => b.id === bookingId);
+            if (!booking) return;
+
+            document.getElementById('chat-session-title').textContent = `${booking.sessionTitle} (with ${booking.mentorName})`;
+            renderChatMessages(booking);
+            document.getElementById('modal-session-chat').classList.remove('hidden');
+        }
+
+        function renderChatMessages(booking) {
+            const user = getCurrentUser();
+            const box = document.getElementById('chat-messages-box');
+            box.innerHTML = booking.chat.map(m => {
+                const isMe = user && m.sender === user.name;
+                return `
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                        <span class="text-[10px] text-slate-400 mb-0.5">${m.sender} • ${m.time}</span>
+                        <div class="px-3.5 py-2 rounded-2xl text-xs max-w-[85%] ${isMe ? 'bg-indigo-900 text-white' : 'bg-slate-100 text-slate-800'}">
+                            ${m.text}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function handleSendChatMessage(e) {
+            e.preventDefault();
+            const user = getCurrentUser();
+            const booking = appState.bookings.find(b => b.id === activeChatBookingId);
+            if (!user || !booking) return;
+
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            booking.chat.push({
+                sender: user.name,
+                time: 'Just now',
+                text
+            });
+
+            input.value = '';
+            saveState();
+            renderChatMessages(booking);
+            renderDashboard();
+        }
+
+        // Complete & Rate Tutor Modal Actions
+        function openRateTutorModal(bookingId) {
+            activeRatingBookingId = bookingId;
+            selectedStarRating = 5;
+            const booking = appState.bookings.find(b => b.id === bookingId);
+            if (!booking) return;
+
+            document.getElementById('rate-session-label').textContent = `Rate ${booking.mentorName} for "${booking.sessionTitle}"`;
+            setStarRating(5);
+            document.getElementById('modal-rate-tutor').classList.remove('hidden');
+        }
+
+        function setStarRating(stars) {
+            selectedStarRating = stars;
+            document.querySelectorAll('.star-btn').forEach((btn, idx) => {
+                if (idx + 1 === stars) {
+                    btn.classList.add('border-2', 'border-amber-500', 'bg-amber-100', 'text-amber-800', 'font-extrabold');
+                } else {
+                    btn.classList.remove('border-2', 'border-amber-500', 'bg-amber-100', 'text-amber-800', 'font-extrabold');
+                }
+            });
+        }
+
+        function handleCompleteAndRate(e) {
+            e.preventDefault();
+            const user = getCurrentUser();
+            const booking = appState.bookings.find(b => b.id === activeRatingBookingId);
+            if (!user || !booking) return;
+
+            const reviewText = document.getElementById('rate-review-text').value.trim();
+            booking.status = 'Completed';
+            booking.userRating = selectedStarRating;
+
+            // Update session rating & add review
+            const session = appState.sessions.find(s => s.id === booking.sessionId);
+            if (session) {
+                const totalScore = session.rating * session.reviewCount + selectedStarRating;
+                session.reviewCount += 1;
+                session.rating = Number((totalScore / session.reviewCount).toFixed(1));
+                session.reviews.unshift({
+                    author: user.name,
+                    stars: selectedStarRating,
+                    text: reviewText
+                });
+
+                // Transfer 1 credit to mentor account if present
+                const mentorAcc = appState.accounts.find(a => a.email === session.mentorEmail);
+                if (mentorAcc) {
+                    mentorAcc.credits += 1;
+                    appState.ledger.unshift({
+                        id: Date.now(),
+                        email: mentorAcc.email,
+                        reason: `Completed Tutoring Session: ${session.title}`,
+                        time: 'Just now',
+                        delta: '+1 Cr',
+                        type: 'earn'
+                    });
+                }
+            }
+
+            appState.stats.sessions += 1;
+            saveState();
+            updateNavbarUI();
+            closeModal('modal-rate-tutor');
+            renderDashboard();
+            showToast(`Session marked completed & rated ${selectedStarRating} ★!`);
+        }
+
+        function cancelBooking(bookingId) {
+            const user = getCurrentUser();
+            const booking = appState.bookings.find(b => b.id === bookingId);
+            if (!user || !booking || booking.status !== 'Upcoming') return;
+
+            booking.status = 'Cancelled';
+            user.credits += 1;
+
+            appState.ledger.unshift({
+                id: Date.now(),
+                email: user.email,
+                reason: `Cancelled Booking Refund: ${booking.sessionTitle}`,
+                time: 'Just now',
+                delta: '+1 Cr',
+                type: 'earn'
+            });
+
+            saveState();
+            updateNavbarUI();
+            renderDashboard();
+            showToast('Booking cancelled and +1 Skill Credit refunded.');
+        }
+
+        function simulateStudentCompleted(sessionId) {
+            const user = getCurrentUser();
+            const session = appState.sessions.find(s => s.id === sessionId);
+            if (!user || !session) return;
+
+            user.credits += 1;
+            appState.stats.sessions += 1;
+            appState.stats.credits += 1;
+
+            appState.ledger.unshift({
+                id: Date.now(),
+                email: user.email,
+                reason: `Completed Teaching Session: ${session.title}`,
+                time: 'Just now',
+                delta: '+1 Cr',
+                type: 'earn'
+            });
+
+            saveState();
+            updateNavbarUI();
+            renderDashboard();
+            showToast(`Student completed "${session.title}"! Earned +1 Skill Credit.`);
+        }
+
+        function deleteTeachingSession(sessionId) {
+            appState.sessions = appState.sessions.filter(s => s.id !== sessionId);
+            saveState();
+            renderDashboard();
+            showToast('Removed tutoring listing.');
+        }
+
+        // Faculty Moderation Actions
+        function toggleNoteVerified(noteId) {
+            const note = appState.notes.find(n => n.id === noteId);
+            if (!note) return;
+            note.verified = !note.verified;
+            saveState();
+            renderDashboard();
+            showToast(`Updated verification status for "${note.title}".`);
+        }
+
+        function deleteForumPost(postId) {
+            appState.forumPosts = appState.forumPosts.filter(p => p.id !== postId);
+            saveState();
+            renderDashboard();
+            showToast('Removed flagged forum post.');
+        }
+
+        // =========================================================================
+        // 10. USER PROFILE & SETTINGS
+        // =========================================================================
+        function renderProfilePage() {
+            const user = getCurrentUser();
+            if (!user) return;
+
+            document.getElementById('prof-avatar').textContent = user.initials;
+            document.getElementById('prof-display-name').textContent = user.name;
+            document.getElementById('prof-email-display').textContent = `${user.email} • ${user.role}`;
+            document.getElementById('prof-input-name').value = user.name;
+            document.getElementById('prof-input-dept').value = user.dept;
+            document.getElementById('prof-input-bio').value = user.bio || '';
+            document.getElementById('prof-input-skills').value = (user.skills || []).join(', ');
+
+            renderSkillTags(user.skills || []);
+        }
+
+        function renderSkillTags(skills) {
+            document.getElementById('prof-skills-tags').innerHTML = skills.map(sk => `
+                <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200 text-xs font-bold">${sk}</span>
+            `).join('');
+        }
+
+        function handleProfileSave(e) {
+            e.preventDefault();
+            const user = getCurrentUser();
+            if (!user) return;
+
+            const newName = document.getElementById('prof-input-name').value.trim();
+            const newDept = document.getElementById('prof-input-dept').value.trim();
+            const newBio = document.getElementById('prof-input-bio').value.trim();
+            const skillsRaw = document.getElementById('prof-input-skills').value;
+
+            user.name = newName;
+            user.initials = newName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            user.dept = newDept;
+            user.bio = newBio;
+            user.skills = skillsRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+            saveState();
+            updateNavbarUI();
+            renderProfilePage();
+            showToast('Profile settings saved!');
+        }
+
+        // =========================================================================
+        // 11. SHARED MODAL & TOAST UTILITIES
+        // =========================================================================
+        function toggleFaqItem(index) {
+            const body = document.getElementById(`faq-body-${index}`);
+            const icon = document.getElementById(`faq-icon-${index}`);
+            if (!body) return;
+            const isHidden = body.classList.contains('hidden');
+            body.classList.toggle('hidden');
+            if (icon) {
+                icon.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = type === 'error'
+                ? 'bg-rose-900 border-rose-500/40 text-white'
+                : 'bg-indigo-950 border-emerald-500/40 text-white';
+
+            toast.className = `${colors} px-4 py-3 rounded-xl shadow-xl border text-xs sm:text-sm font-semibold flex items-center gap-2 pointer-events-auto transition-all duration-300`;
+            toast.innerHTML = `<span>${type === 'error' ? '⚠️' : '✅'}</span><span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(8px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        // Initialize Application on Window Load
+        window.onload = function () {
+            loadState();
+            updateNavbarUI();
+            renderHomeView();
+            if (window.lucide) lucide.createIcons();
+        };
+    </script>
+</body>
+</html>
